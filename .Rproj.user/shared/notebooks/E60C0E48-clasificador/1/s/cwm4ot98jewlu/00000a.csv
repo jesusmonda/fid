@@ -1,0 +1,5 @@
+"0","tree <- rpart(Confirmed ~ ., data, method=""class"", minsplit = 2)"
+"0","rpart.plot(tree)"
+"2","All boxes will be white (the box.palette argument will be ignored) because
+the number of classes in the response 23 is greater than length(box.palette) 6.
+To silence this warning use box.palette=0 or trace=-1."

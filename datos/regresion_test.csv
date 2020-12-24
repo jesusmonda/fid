@@ -1,0 +1,16 @@
+ObservationDate,Province,Country,Confirmed,Deaths
+01262020,Hubei,Mainland China,2118,56
+01272020,Hubei,Mainland China,2927,82
+01282020,Hubei,Mainland China,5578,131
+02092020,Hubei,Mainland China,40136,906
+02102020,Hubei,Mainland China,42748,1013
+02112020,Hubei,Mainland China,44787,1113
+02122020,Hubei,Mainland China,45206,1118
+05242020,fake,Afghanistan,5407764,345065
+06262020,fake,Afghanistan,9802724,494190
+08092020,fake,Afghanistan,19877133,731482
+08102020,fake,Afghanistan,20104102,736636
+08112020,fake,Afghanistan,20358571,742869
+09262020,fake,Afghanistan,32882111,994831
+09272020,fake,Afghanistan,33126122,998445
+09282020,fake,Afghanistan,33399009,1002358

@@ -1,0 +1,24 @@
+ObservationDate,Province,Country,Confirmed,Deaths
+01222020,Anhui,Mainland China,555,17
+01232020,Anhui,Mainland China,653,18
+01242020,Hubei,Mainland China,941,26
+01252020,Hubei,Mainland China,1438,42
+01262020,Hubei,Mainland China,2118,56
+01272020,Hubei,Mainland China,2927,82
+01282020,Hubei,Mainland China,5578,131
+01292020,Hubei,Mainland China,6165,133
+01302020,Hubei,Mainland China,8235,171
+01312020,Hubei,Mainland China,9925,213
+02012020,Hubei,Mainland China,12030,259
+02022020,Hubei,Mainland China,16779,362
+02032020,Hubei,Mainland China,19870,426
+02042020,Hubei,Mainland China,23878,492
+02052020,Hubei,Mainland China,27621,564
+02062020,Hubei,Mainland China,30803,634
+02072020,Hubei,Mainland China,34377,719
+02082020,Hubei,Mainland China,37106,806
+02092020,Hubei,Mainland China,40136,906
+02102020,Hubei,Mainland China,42748,1013
+02112020,Hubei,Mainland China,44787,1113
+02122020,Hubei,Mainland China,45206,1118
+02132020,Hubei,Mainland China,60352,1371
