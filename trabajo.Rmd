@@ -1,6 +1,10 @@
+# Trabajo FID
+
 El dataset utilizado ha sido https://www.kaggle.com/sudalairajkumar/novel-corona-virus-2019-dataset?select=covid_19_data.csv
 
-ARBOL DE DECISIÓN
+# Predicción supervisada
+
+## CLASIFICACIÓN MEDIANTE ÁRBOL
 
 Instalamos la librería rattle
 ```{r}
@@ -21,6 +25,8 @@ tree <- rpart(Confirmed ~ ., data, method="class", minsplit = 2)
 rpart.plot(tree)
 ```
 
+
+
 Cargamos los datos de test
 ```{r}
 test <- read.delim('datos/arbol_test.csv', sep=",", head = TRUE)
@@ -37,7 +43,7 @@ acc <- sum(diag(conf)) / sum(conf)
 print(acc)
 ```
 
-REGRESIÓN LINEAL
+## REGRESIÓN LINEAL
 ```{r}
 data <- read.delim('datos/regresion_train.csv', sep=",", head = TRUE)
 ```
@@ -59,3 +65,39 @@ confirmed <- data.frame(ObservationDate = 09282020)
 predict(regresion, confirmed)
 ```
 Ha predicho 33407279, ha predicho 8270 contagios de más.
+
+## Naive Bayes
+
+Naive Bayes es un modelo para predecir por probabilidad Bayesiana.
+
+
+```{r}
+install.packages("naivebayes")
+```
+
+```{r}
+library(naivebayes)
+```
+
+
+```{r}
+data_sintomas <- read.delim('datos_sintomas/Cleaned-Data.csv', sep=",", head = TRUE)
+```
+
+
+```{r}
+# creamos el modelo de pronostico
+
+nb2 <- naive_bayes(as.factor(Severity_Severe) ~ Age_60., data_sintomas, usepoisson = TRUE)
+
+nb1 <- naive_bayes(as.factor(Confirmed) ~ ObservationDate, data, usepoisson = TRUE)
+```
+
+
+```{r}
+predict(nb1, test[3,])
+```
+
+
+# Predicción no supervisada
+
