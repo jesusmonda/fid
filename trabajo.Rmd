@@ -15,13 +15,13 @@ library(rpart.plot)
 
 Vamos a realizar un arbol de decisión para obtener los campos más importantes.
 ```{r}
-data <- read.delim('datos/arbol_train.csv', sep=",", head = TRUE)
+data_arbol <- read.delim('datos/arbol_train.csv', sep=",", head = TRUE)
 colnames(data)
 ```
 
 Dibujamos el arbol y lo exportamos al fichero arbol.pdf, podemos observar como el campo más importante es la fecha del contagio.
 ```{r}
-tree <- rpart(Confirmed ~ ., data, method="class", minsplit = 2)
+tree <- rpart(Confirmed ~ ., data_arbol, method="class", minsplit = 2)
 rpart.plot(tree)
 ```
 
@@ -59,18 +59,27 @@ plot(data$ObservationDate, data$Confirmed, xlab='ObservationDate', ylab='Confirm
 abline(regresion)
 ```
 
-Predecimos un día correspondiente al archivo datos/regresion_test.csv, por ejemplo el día 09282020 en el cual hubo 33399009 contagios
+Predecimos un día correspondiente al archivo datos/regresion_test.csv, por ejemplo el día 09/28/2020 en el cual hubo 33399009 contagios
 ```{r}
-confirmed <- data.frame(ObservationDate = 09282020)
+
+# Primero calculamos la diferencia de días
+days <- as.Date(c("2020-09-28", "2020-01-22"))
+days_diff <- mydates[1] - mydates[2]
+days_diff <- as.numeric(days_diff)
+#Hay 250 días de diferencia
+
+
+confirmed <- data.frame(ObservationDate = days_diff)
 predict(regresion, confirmed)
 ```
-Ha predicho 33407279, ha predicho 8270 contagios de más.
+Ha predicho 35206747, y en el día 250 se datan de 35206747, por lo que ha predicho 1807738 contagios de menos.
+
 
 ## Naive Bayes
 
 Naive Bayes es un modelo para predecir por probabilidad Bayesiana.
 
-
+Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
 ```{r}
 install.packages("naivebayes")
 ```
@@ -85,19 +94,43 @@ data_sintomas <- read.delim('datos_sintomas/Cleaned-Data.csv', sep=",", head = T
 ```
 
 
+Ahora vamos a calcular la probabilidad de que el Covid afecte de forma grave en función de la edad y de si padece de fiebre
+
 ```{r}
-# creamos el modelo de pronostico
+nb1 <- naive_bayes(as.factor(Severity_Severe) ~ Age_60.+ Fever, data_sintomas)
 
-nb2 <- naive_bayes(as.factor(Severity_Severe) ~ Age_60., data_sintomas, usepoisson = TRUE)
+plot(nb1)
 
-nb1 <- naive_bayes(as.factor(Confirmed) ~ ObservationDate, data, usepoisson = TRUE)
 ```
 
 
 ```{r}
-predict(nb1, test[3,])
+nb2 <- naive_bayes(as.factor(Severity_Severe) ~ Age_0.9 +  Fever, data_sintomas)
+
+
+plot(nb2)
 ```
 
+Ahora calcuaremos la probabilidad de que sea un caso grave en supuesto que la persona tenga mas de 60 años y fiebre
+```{r}
+data_test = data_sintomas[1,]
+data_test$Age_60. = 1
+data_test$fever = 1
+predict = predict(nb1, data_test, type="prob")    
+predict
+
+```
+
+
+
+```{r}
+data_test = data_sintomas[1,]
+data_test$Age_0.9 = 1
+data_test$fever = 1
+predict = predict(nb2, data_test, type="prob")    
+predict
+```
+La probabilidades la misma, por lo que podemos concluir con que tanto la edad como el tener o no fiebre no implacta en si es grave o no
 
 # Predicción no supervisada
 
