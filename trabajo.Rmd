@@ -7,8 +7,12 @@ El dataset utilizado ha sido https://www.kaggle.com/sudalairajkumar/novel-corona
 ## CLASIFICACIÓN MEDIANTE ÁRBOL
 
 Instalamos la librería rattle
+
 ```{r}
 install.packages("rattle")
+```
+
+```{r}
 library(rpart)
 library(rpart.plot)
 ```
@@ -45,39 +49,39 @@ print(acc)
 
 ## REGRESIÓN LINEAL
 ```{r}
-data <- read.delim('datos/regresion_train.csv', sep=",", head = TRUE)
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 ```
 
 ```{r}
-regresion <- lm(Confirmed~ObservationDate, data = data)
+regresion <- lm(New.cases~Date, data = data)
 summary(regresion)
 ```
 
 Podemos observar como el número de contagios aumenta por día
 ```{r}
-plot(data$ObservationDate, data$Confirmed, xlab='ObservationDate', ylab='Confirmed')
+plot(data$Date, data$New.cases, xlab='Date', ylab='New Cases')
 abline(regresion)
 ```
 
-Predecimos un día correspondiente al archivo datos/regresion_test.csv, por ejemplo el día 09/28/2020 en el cual hubo 33399009 contagios
+Predecimos un día correspondiente al archivo datos/regresion_test.csv, por ejemplo el día 28/05/2020 en el cual hubo 119314 nuevos contagios
 ```{r}
 
 # Primero calculamos la diferencia de días
-days <- as.Date(c("2020-09-28", "2020-01-22"))
+mydates <- as.Date(c("2020-05-28", "2020-01-22"))
 days_diff <- mydates[1] - mydates[2]
 days_diff <- as.numeric(days_diff)
-#Hay 250 días de diferencia
+#Hay 127 días de diferencia
 
 
-confirmed <- data.frame(ObservationDate = days_diff)
+confirmed <- data.frame(Date = days_diff)
 predict(regresion, confirmed)
 ```
-Ha predicho 35206747, y en el día 250 se datan de 35206747, por lo que ha predicho 1807738 contagios de menos.
+Ha predicho 13188, por lo que ha habido un error de 12569.
 
 
 ## Naive Bayes
 
-Naive Bayes es un modelo para predecir por probabilidad Bayesiana.
+Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí
 
 Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
 ```{r}
@@ -88,49 +92,61 @@ install.packages("naivebayes")
 library(naivebayes)
 ```
 
-
 ```{r}
-data_sintomas <- read.delim('datos_sintomas/Cleaned-Data.csv', sep=",", head = TRUE)
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 ```
 
-
-Ahora vamos a calcular la probabilidad de que el Covid afecte de forma grave en función de la edad y de si padece de fiebre
+Mediante este método, vamos a calcular la probabilidad de que el dato haya sido tomado en una estación o en otra sea de una estación u otra dependiendo de los casos nuevos, el registro de muertes diario y el número de recuperados diario.
 
 ```{r}
-nb1 <- naive_bayes(as.factor(Severity_Severe) ~ Age_60.+ Fever, data_sintomas)
+nb <- naive_bayes(as.factor(Seasson) ~ New.cases + New.deaths + New.recovered, data)
 
-plot(nb1)
-
+plot(nb)
 ```
 
-
+Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra el valor medio que tienen estos atributos para cada estación
 ```{r}
-nb2 <- naive_bayes(as.factor(Severity_Severe) ~ Age_0.9 +  Fever, data_sintomas)
-
-
-plot(nb2)
+nb$tables
 ```
+De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
 
-Ahora calcuaremos la probabilidad de que sea un caso grave en supuesto que la persona tenga mas de 60 años y fiebre
 ```{r}
-data_test = data_sintomas[1,]
-data_test$Age_60. = 1
-data_test$fever = 1
-predict = predict(nb1, data_test, type="prob")    
+data_test = data[1,]
+data_test$New.cases = 1000
+data_test$New.deaths = 2000
+data_test$New.recovered = 5000
+predict = predict(nb, data_test, type="prob")    
 predict
 
 ```
-
-
-
 ```{r}
-data_test = data_sintomas[1,]
-data_test$Age_0.9 = 1
-data_test$fever = 1
-predict = predict(nb2, data_test, type="prob")    
+data_test = data[1,]
+data_test$New.cases = 500
+data_test$New.deaths = 20000
+data_test$New.recovered = 5000
+predict = predict(nb, data_test, type="prob")    
 predict
 ```
-La probabilidades la misma, por lo que podemos concluir con que tanto la edad como el tener o no fiebre no implacta en si es grave o no
+## SVM - Máquinas de vectores de soporte (Probandose)
+
+```{r}
+library(e1071)
+
+# Ejecución del modelo SVM
+modelo <- svm(as.factor(Seasson)~., data=data)
+
+data_test = data[1,]
+data_test$New.cases = 100
+data_test$New.deaths = 2000
+data_test$New.recovered = 500
+
+# Predicción de los restantes
+prediction <- predict(modelo,new=data_test)
+prediction
+
+plot(modelo)
+```
+
 
 # Predicción no supervisada
 
