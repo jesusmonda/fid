@@ -1,6 +1,6 @@
 # Trabajo FID
 
-El dataset utilizado ha sido https://www.kaggle.com/sudalairajkumar/novel-corona-virus-2019-dataset?select=covid_19_data.csv
+El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
 
 # Predicción supervisada
 
@@ -73,11 +73,10 @@ days_diff <- as.numeric(days_diff)
 #Hay 127 días de diferencia
 
 
-confirmed <- data.frame(Date = days_diff)
-predict(regresion, confirmed)
+date <- data.frame(Date = days_diff)
+predict(regresion, date)
 ```
 Ha predicho 13188, por lo que ha habido un error de 12569.
-
 
 ## Naive Bayes
 
@@ -133,6 +132,7 @@ predict
 library(e1071)
 
 # Ejecución del modelo SVM
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 modelo <- svm(as.factor(Seasson)~., data=data)
 
 data_test = data[1,]
@@ -149,4 +149,31 @@ plot(modelo)
 
 
 # Predicción no supervisada
+
+## 
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
+data$Deaths <- NULL
+data$Recovered <- NULL
+data$Active <- NULL
+data$New.cases <- NULL
+data$New.deaths <- NULL
+data$New.recovered <- NULL
+data$Deaths...100.Cases <- NULL
+data$Deaths...100.Recovered <- NULL
+data$No..of.countries <- NULL
+data$New.Cases.gt.5000 <- NULL
+data$New.Deaths.gt.5000 <- NULL
+data$New.Recover.gt.5000 <- NULL
+data$Date <- NULL
+data$Recovered...100.Cases <- NULL
+dim(data)
+head(data)
+str(data)
+table(data)
+
+kmeans_toys <- kmeans(x = data, center = 3, nstart=20)
+
+
+```
 
