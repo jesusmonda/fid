@@ -150,7 +150,7 @@ plot(modelo)
 
 # Predicción no supervisada
 
-## 
+## KMeans (probando)
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
 data$Deaths <- NULL
@@ -172,8 +172,36 @@ head(data)
 str(data)
 table(data)
 
-kmeans_toys <- kmeans(x = data, center = 3, nstart=20)
+wss <- 0
+for (i in 1:15) {
+km.out <- kmeans(x = data, centers = i, nstar=20)
+wss[i] <- km.out$tot.withinss
+}
+plot(1:15, wss, type = "b", xlab = "Number of Clusters",
+ylab = "Within groups sum of squares")
 
+plot(data, col=kmeans_data$cluster, main="Tres clusters")
 
+```
+## Cluster jerárquico (probando)
+```{r}
+d <- dist(data, method = "euclidean")
+hc1 <- hclust(d, method = "complete" )
+
+summary(hc1)
+
+c <- cutree(hc1, k = 3)
+plot(c)
+
+# Cluster usando método completo
+hclust.complete <- hclust(dist(data), method = "complete")
+# Average linkage: hclust.average
+hclust.average <- hclust(dist(data), method = "average")
+# Single linkage
+hclust.single <- hclust(dist(data), method = "single")
+# Plot dendrogram de hclust.complete, hclust.average y hclust.single
+plot(hclust.complete, main = "Complete")
+plot(hclust.average, main = "Average")
+plot(hclust.single, main = "Single")
 ```
 
