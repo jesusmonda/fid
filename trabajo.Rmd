@@ -151,8 +151,12 @@ plot(modelo)
 
 # Predicción no supervisada
 
-## KMeans (https://rpubs.com/williamsurles/310847)
+## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
 ```{r}
+#La agrupación en R es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+
+#K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de conglomerados es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. Este algoritmo también descubre el centroide del cúmulo.
+
 data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
 data$Deaths <- NULL
 data$Recovered <- NULL
@@ -195,25 +199,35 @@ plot(data,
      main = paste("k-means clustering with", k, "clusters"),
      xlab = "Confirmados", ylab = "Epoca")
 ```
-## Cluster jerárquico (probando)
+## 2. Principal component analysis (https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
 ```{r}
-d <- dist(data, method = "euclidean")
-hc1 <- hclust(d, method = "complete" )
+data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
+data$Deaths <- NULL
+data$Recovered <- NULL
+data$Active <- NULL
+data$New.cases <- NULL
+data$New.deaths <- NULL
+data$New.recovered <- NULL
+data$Deaths...100.Cases <- NULL
+data$Deaths...100.Recovered <- NULL
+data$No..of.countries <- NULL
+data$New.Cases.gt.5000 <- NULL
+data$New.Deaths.gt.5000 <- NULL
+data$New.Recover.gt.5000 <- NULL
+data$Date <- NULL
+data$Recovered...100.Cases <- NULL
+head(data)
 
-summary(hc1)
+pairs(data[, -5], pch = 19)
 
-c <- cutree(hc1, k = 3)
-plot(c)
+# Ahora vamos a reducir las dimensiones
+irispca <- prcomp(data[, -5])
+summary(irispca)
 
-# Cluster usando método completo
-hclust.complete <- hclust(dist(data), method = "complete")
-# Average linkage: hclust.average
-hclust.average <- hclust(dist(data), method = "average")
-# Single linkage
-hclust.single <- hclust(dist(data), method = "single")
-# Plot dendrogram de hclust.complete, hclust.average y hclust.single
-plot(hclust.complete, main = "Complete")
-plot(hclust.average, main = "Average")
-plot(hclust.single, main = "Single")
+# Un biplot presenta todos los puntos originales re-mapeados (rotados) a lo largo de las dos primeras PCs, así como las características originales como vectores a lo largo de las mismas PCs.
+
+# Extraemos las desviaciones estándar del resultado del PCA para calcular las desviaciones, y luego obtengo el porcentaje y la varianza acumulada a lo largo de los PC.
+biplot(irispca)
+var <- irispca$sdev^2
+(pve <- var/sum(var))
 ```
-
