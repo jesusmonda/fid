@@ -126,6 +126,7 @@ data_test$New.recovered = 5000
 predict = predict(nb, data_test, type="prob")    
 predict
 ```
+
 ## SVM - Máquinas de vectores de soporte (Probandose)
 
 ```{r}
@@ -150,7 +151,7 @@ plot(modelo)
 
 # Predicción no supervisada
 
-## KMeans (probando)
+## KMeans (https://rpubs.com/williamsurles/310847)
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
 data$Deaths <- NULL
@@ -167,21 +168,32 @@ data$New.Deaths.gt.5000 <- NULL
 data$New.Recover.gt.5000 <- NULL
 data$Date <- NULL
 data$Recovered...100.Cases <- NULL
-dim(data)
 head(data)
-str(data)
-table(data)
 
+# Interpetar los datos, podemos obsevar como hay claramente 3 grupos. (1 = invierno, 2 = primavera,3 = verano)
+km.out <- kmeans(data, centers = 3, nstart = 20)
+summary(km.out) # Inspect the result
+plot(data, 
+  col = km.out$cluster,
+  main = "k-means with 3 clusters",
+  xlab = "Confirmados", ylab = "Epoca")
+
+# Determinar el numero de cluster
 wss <- 0
 for (i in 1:15) {
-km.out <- kmeans(x = data, centers = i, nstar=20)
-wss[i] <- km.out$tot.withinss
+  km.out <- kmeans(x = data, centers = i, nstar=20)
+  wss[i] <- km.out$tot.withinss
 }
-plot(1:15, wss, type = "b", xlab = "Number of Clusters",
-ylab = "Within groups sum of squares")
+plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
 
-plot(data, col=kmeans_data$cluster, main="Tres clusters")
+# Hay un punto dulce donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso es 4
 
+k <- 4
+km <- kmeans(data, centers = k, nstart = 20, iter.max = 50)
+plot(data,
+     col = km$cluster,
+     main = paste("k-means clustering with", k, "clusters"),
+     xlab = "Confirmados", ylab = "Epoca")
 ```
 ## Cluster jerárquico (probando)
 ```{r}
