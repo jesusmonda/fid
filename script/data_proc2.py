@@ -39,7 +39,7 @@ for line in f.readlines():
         data.append('New Cases gt 5000')
         data.append('New Deaths gt 5000')
         data.append('New Recover gt 5000')
-        data.append('Seasson')
+        data.append('Season')
     else:
         day = datetime.strptime(data[0], '%Y-%m-%d')
         data[0] = (day - first_day).days

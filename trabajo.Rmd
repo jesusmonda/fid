@@ -19,13 +19,13 @@ library(rpart.plot)
 
 Vamos a realizar un arbol de decisión para obtener los campos más importantes.
 ```{r}
-data_arbol <- read.delim('datos/arbol_train.csv', sep=",", head = TRUE)
+data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 colnames(data)
 ```
 
 Dibujamos el arbol y lo exportamos al fichero arbol.pdf, podemos observar como el campo más importante es la fecha del contagio.
 ```{r}
-tree <- rpart(Confirmed ~ ., data_arbol, method="class", minsplit = 2)
+tree <- rpart(Seasson ~ New.cases + New.deaths + New.recovered, data_arbol, method="class", minsplit = 2)
 rpart.plot(tree)
 ```
 
@@ -127,25 +127,21 @@ predict = predict(nb, data_test, type="prob")
 predict
 ```
 
-## SVM - Máquinas de vectores de soporte (Probandose)
+## SVM - Máquinas de vectores de soporte 
+
 
 ```{r}
 library(e1071)
-
 # Ejecución del modelo SVM
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-modelo <- svm(as.factor(Seasson)~., data=data)
 
-data_test = data[1,]
-data_test$New.cases = 100
-data_test$New.deaths = 2000
-data_test$New.recovered = 500
+dat = data.frame(x= data$New.cases, y = as.factor(data$Seasson))
+modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
 
-# Predicción de los restantes
-prediction <- predict(modelo,new=data_test)
-prediction
 
-plot(modelo)
+prediccion <- predict(modelo,new=data) #Hay que inventar
+
+(mc <- with(data,(table(prediccion,Seasson))))
 ```
 
 
