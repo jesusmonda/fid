@@ -4,34 +4,37 @@ El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report
 
 # Predicción supervisada
 
+Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
+Trataremos de predecir la estación del año a la que pertenece el dato, teniendo en cuenta los casos, las muertes y las recuperaciones diarias.
+
 ## CLASIFICACIÓN MEDIANTE ÁRBOL
 
-Instalamos la librería rattle
+Instalamos la librería rattle para poder hacer la predicción mediante árbol
 
 ```{r}
 install.packages("rattle")
 ```
 
+Cargamos el paquete
 ```{r}
 library(rpart)
 library(rpart.plot)
 ```
 
-Vamos a realizar un arbol de decisión para obtener los campos más importantes.
 ```{r}
 data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 colnames(data)
 ```
 
-Dibujamos el arbol y lo exportamos al fichero arbol.pdf, podemos observar como el campo más importante es la fecha del contagio.
+Ahora vamos a generar y a dibujar el árbol
 ```{r}
-tree <- rpart(Seasson ~ New.cases + New.deaths + New.recovered, data_arbol, method="class", minsplit = 2)
+tree <- rpart(Seasson ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
 rpart.plot(tree)
 ```
+ 
+#TODO
 
-
-
-Cargamos los datos de test
+Ahora vamos a cargar los datos de testeo para poder probar la capacidad de predicción del árbol generado
 ```{r}
 test <- read.delim('datos/arbol_test.csv', sep=",", head = TRUE)
 colnames(data)
@@ -46,39 +49,10 @@ View(conf)
 acc <- sum(diag(conf)) / sum(conf)
 print(acc)
 ```
-
-## REGRESIÓN LINEAL
-```{r}
-data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-```
-
-```{r}
-regresion <- lm(New.cases~Date, data = data)
-summary(regresion)
-```
-
-Podemos observar como el número de contagios aumenta por día
-```{r}
-plot(data$Date, data$New.cases, xlab='Date', ylab='New Cases')
-abline(regresion)
-```
-
-Predecimos un día correspondiente al archivo datos/regresion_test.csv, por ejemplo el día 28/05/2020 en el cual hubo 119314 nuevos contagios
-```{r}
-
-# Primero calculamos la diferencia de días
-mydates <- as.Date(c("2020-05-28", "2020-01-22"))
-days_diff <- mydates[1] - mydates[2]
-days_diff <- as.numeric(days_diff)
-#Hay 127 días de diferencia
-
-
-date <- data.frame(Date = days_diff)
-predict(regresion, date)
-```
-Ha predicho 13188, por lo que ha habido un error de 12569.
-
+ 
 ## Naive Bayes
+
+Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html
 
 Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí
 
@@ -109,6 +83,8 @@ nb$tables
 ```
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
 
+#TODO
+
 ```{r}
 data_test = data[1,]
 data_test$New.cases = 1000
@@ -129,6 +105,11 @@ predict
 
 ## SVM - Máquinas de vectores de soporte 
 
+Fuentes: https://www.diegocalvo.es/svm-maquinas-de-vectores-de-soporte-en-r/
+
+Este método de clasificación se basa en la busqueda un hiperplano que separe de forma óptima a todos los puntos de una clase, clasificandolos.
+El algoritmo de SVM tratará de buscar el hiperplano que tenga la máxima distancia posible con los puntos, de esta forma se podrá hacer una mejor clasificación de los datos, 
+etiquetando cada dato dependiendo de en que lado del hiperplano se encuentra.
 
 ```{r}
 library(e1071)
@@ -138,7 +119,9 @@ data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRU
 dat = data.frame(x= data$New.cases, y = as.factor(data$Seasson))
 modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
 
+```
 
+```{r}
 prediccion <- predict(modelo,new=data) #Hay que inventar
 
 (mc <- with(data,(table(prediccion,Seasson))))
