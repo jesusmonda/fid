@@ -61,16 +61,17 @@ Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (htt
 install.packages("naivebayes")
 ```
 
+Después cargamos el paquete
 ```{r}
 library(naivebayes)
 ```
 
+Cargamos los datos
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 ```
 
-Mediante este método, vamos a calcular la probabilidad de que el dato haya sido tomado en una estación o en otra sea de una estación u otra dependiendo de los casos nuevos, el registro de muertes diario y el número de recuperados diario.
-
+E introducimos los datos, es importante factorizar la propiedad de "Season" para que funcione la función
 ```{r}
 nb <- naive_bayes(as.factor(Seasson) ~ New.cases + New.deaths + New.recovered, data)
 
@@ -84,6 +85,8 @@ nb$tables
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
 
 #TODO
+
+Ahora vamos a comprobar que es capaz de predecir este modelo.
 
 ```{r}
 data_test = data[1,]
@@ -121,6 +124,9 @@ modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, 
 
 ```
 
+#TODO
+
+Ahora mediante el dataset de testeo probaremos la capacidad de predicción de este modelo.
 ```{r}
 prediccion <- predict(modelo,new=data) #Hay que inventar
 
