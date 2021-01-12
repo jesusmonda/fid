@@ -137,52 +137,54 @@ prediccion <- predict(modelo,new=data) #Hay que inventar
 # Predicción no supervisada
 
 ## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
+
+La agrupación en R es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+
+K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de conglomerados es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. Este algoritmo también descubre el centroide del cúmulo.
+
+Cargamos librerias
 ```{r}
-#La agrupación en R es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
-
-#K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de conglomerados es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. Este algoritmo también descubre el centroide del cúmulo.
-
-data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
-data$Deaths <- NULL
-data$Recovered <- NULL
-data$Active <- NULL
-data$New.cases <- NULL
-data$New.deaths <- NULL
-data$New.recovered <- NULL
-data$Deaths...100.Cases <- NULL
-data$Deaths...100.Recovered <- NULL
-data$No..of.countries <- NULL
-data$New.Cases.gt.5000 <- NULL
-data$New.Deaths.gt.5000 <- NULL
-data$New.Recover.gt.5000 <- NULL
-data$Date <- NULL
-data$Recovered...100.Cases <- NULL
+library(ggplot2)
+```
+Cargamos y visualizamos los datos
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 head(data)
 
-# Interpetar los datos, podemos obsevar como hay claramente 3 grupos. (1 = invierno, 2 = primavera,3 = verano)
-km.out <- kmeans(data, centers = 3, nstart = 20)
+ggplot(data, aes(New.cases, Deaths, Recovered, color = Seasson)) + geom_point()
+
+```
+Interpretamos los datos. Podemos obsevar como hay 3 grupos. (1 = invierno, 2 = primavera,3 = verano)
+```{r}
+km.out <- kmeans(data[0:15], centers = 3, nstart = 20)
 summary(km.out) # Inspect the result
 plot(data, 
   col = km.out$cluster,
-  main = "k-means with 3 clusters",
-  xlab = "Confirmados", ylab = "Epoca")
-
-# Determinar el numero de cluster
+  main = "k-means with 3 clusters")
+```
+Necesitamos elegir k, el número de clusters. 
+Hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
+```{r}
 wss <- 0
 for (i in 1:15) {
-  km.out <- kmeans(x = data, centers = i, nstar=20)
+  km.out <- kmeans(x = data[0:15], centers = i, nstar=20)
   wss[i] <- km.out$tot.withinss
 }
 plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
+```
 
-# Hay un punto dulce donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso es 4
-
-k <- 4
-km <- kmeans(data, centers = k, nstart = 20, iter.max = 50)
+```{r}
+k <- 3
+km <- kmeans(data[0:15], centers = k, nstart = 20)
 plot(data,
      col = km$cluster,
-     main = paste("k-means clustering with", k, "clusters"),
-     xlab = "Confirmados", ylab = "Epoca")
+     main = paste("k-means clustering with", k, "clusters"))
+
+table(km$cluster, data$Seasson)
+```
+Visualizar el resultado:
+```{r}
+ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point()
 ```
 ## 2. Principal component analysis (https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
 ```{r}
