@@ -206,35 +206,48 @@ ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point
 Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seassons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seassons.
 
 
-## 2. Principal component analysis (https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
+## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
+```{r}
+install.packages("FactoMineR")
+require(FactoMineR)
+```
+
+PCA es una de las técnicas de aprendizaje no supervisado, las cuales suelen aplicarse como parte del análisis exploratorio de los datos.
+
+Una de las aplicaciones de PCA es como herramienta para la visualización de datos.
+
+Cargamos los datos:
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
-data$Deaths <- NULL
-data$Recovered <- NULL
-data$Active <- NULL
-data$New.cases <- NULL
-data$New.deaths <- NULL
-data$New.recovered <- NULL
-data$Deaths...100.Cases <- NULL
-data$Deaths...100.Recovered <- NULL
-data$No..of.countries <- NULL
-data$New.Cases.gt.5000 <- NULL
-data$New.Deaths.gt.5000 <- NULL
-data$New.Recover.gt.5000 <- NULL
-data$Date <- NULL
-data$Recovered...100.Cases <- NULL
 head(data)
+```
 
-pairs(data[, -5], pch = 19)
+Antes de aplicar un PCA, las observaciones tienen que moverse al centro del eje de coordenadas, esto es, centrarlas para que tengan media 0, para así eliminar posibles bias en las mediciones.
+La función prcomp() es una de las múltiples funciones en R que realizan PCA, prcomp() centra las variables para que tengan media 0
+```{r}
+pca <- prcomp(data)
+```
 
-# Ahora vamos a reducir las dimensiones
-irispca <- prcomp(data[, -5])
-summary(irispca)
+Otro de los outputs de la función prcomp() es la desviación estándar de cada componente principal:
+```{r}
+pca$sdev
+```
 
-# Un biplot presenta todos los puntos originales re-mapeados (rotados) a lo largo de las dos primeras PCs, así como las características originales como vectores a lo largo de las mismas PCs.
+La varianza explicada por cada componente principal la obtenemos elevando al cuadrado la desviación estándar:
+```{r}
+pca$sdev^2
+```
 
-# Extraemos las desviaciones estándar del resultado del PCA para calcular las desviaciones, y luego obtengo el porcentaje y la varianza acumulada a lo largo de los PC.
-biplot(irispca)
-var <- irispca$sdev^2
-(pve <- var/sum(var))
+Aplicamos PCA
+```{r}
+pca2.nci <- PCA(X = data, scale.unit = TRUE, ncp = 64, graph = FALSE)
+```
+
+Mostramos dos ejemplos para representar las observaciones sobre las dos primeras componentes principales:
+```{r}
+library(factoextra)
+fviz_pca_ind(pca, geom.ind = "point", 
+             col.ind = "#FC4E07", 
+             axes = c(1, 2), 
+             pointsize = 1.5) 
 ```
