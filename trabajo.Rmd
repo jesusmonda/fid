@@ -223,7 +223,7 @@ Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los
 ## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
 ```{r}
 install.packages("FactoMineR")
-require(FactoMineR)
+library("FactoMineR")
 ```
 
 PCA es una de las técnicas de aprendizaje no supervisado, las cuales suelen aplicarse como parte del análisis exploratorio de los datos.
@@ -265,3 +265,58 @@ fviz_pca_ind(pca, geom.ind = "point",
              axes = c(1, 2), 
              pointsize = 1.5) 
 ```
+
+# DBSCAN (https://rpubs.com/elias_jurgen/605966)
+```{r}
+install.packages("dbscan")
+library("dbscan")
+```
+Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
+
+Este método necesita sólo dos parámetros
+
+eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente” basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
+
+minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número se puede elegir basándose en el número de dimensiones del dataset.
+
+D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca es menor que 3
+
+
+
+Cargamos los datos: Sólo hay 3 tipos de seassons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seassons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+data$Seasson <- NULL
+head(data)
+```
+
+Ahora, para elegir el radio de los grupos utilizaremos un K-Distance Plot.
+```{r}
+#df: dataset sin variable "species"
+#k: el número mínimo de puntos que elegimos
+
+kNNdistplot(data, k = 15)
+abline(h = 1000000, lty = 2)
+```
+
+# eps=1000000
+Por lo que se observa en la gráfica tomaremos eps=1000000
+
+Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+```{r}
+cl<-dbscan(data,eps=1000000,MinPts = 5)
+unique(cl$cluster)
+hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=1000000")
+```
+
+# eps=3000000
+Tomaremos eps=3000000
+
+Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+```{r}
+cl<-dbscan(data,eps=3000000,MinPts = 5)
+unique(cl$cluster)
+hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=3000000")
+```
+
+Podemos observar como siempre obtenemos 1 cluster independientemente del valor del eps
