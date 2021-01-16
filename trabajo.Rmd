@@ -334,7 +334,15 @@ head(data)
 
 ```{r}
 data <- as.matrix(data)
-colores <- colorRampPalette(c("pink", "white", "blue"))(256)
-heatmap(x = data, scale = "none", col = colores, cexRow = 0.7)
+
+
+
+install.packages("gplots")
+library(gplots)
+heatmap.2(x = data, scale = "none", col = bluered(256),
+          distfun = function(x){dist(x, method = "euclidean")},
+          hclustfun = function(x){hclust(x, method = "average")},
+          density.info = "none",
+          trace = "none", cexRow = 0.7)
 ```
 
