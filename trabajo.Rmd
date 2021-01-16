@@ -274,14 +274,11 @@ library("dbscan")
 Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
 
 Este método necesita sólo dos parámetros
-
-eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente” basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
-
-minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número se puede elegir basándose en el número de dimensiones del dataset.
-
-D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca es menor que 3
-
-
+  ·eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente”   basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
+  
+  ·minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número   se puede elegir basándose en el número de dimensiones del dataset.
+  
+  ·D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca    es menor que 3
 
 Cargamos los datos: Sólo hay 3 tipos de seassons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seassons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
 ```{r}
