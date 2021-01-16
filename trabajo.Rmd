@@ -7,7 +7,9 @@ El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report
 Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
 Trataremos de predecir la estación del año a la que pertenece el dato, teniendo en cuenta los casos, las muertes y las recuperaciones diarias.
 
-## CLASIFICACIÓN MEDIANTE ÁRBOL
+## Clasificación mediante árbol
+
+Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
 
 Instalamos la librería rattle para poder hacer la predicción mediante árbol
 
@@ -50,11 +52,23 @@ acc <- sum(diag(conf)) / sum(conf)
 print(acc)
 ```
  
-## Naive Bayes
+## Clasificación mediante Naive Bayes
 
-Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html
+Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html, https://rpubs.com/riazakhan94/naive_bayes_classifier_e1071
 
-Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí
+Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí. La formula de Bayes es:
+
+$$
+P(B|A) = \frac{P(A|B)*P(B)}{P(A)}
+$$
+Donde:
+
+1. P(A) es la probabilidad de que A sea cierto
+2. P(B) es la probabildiad de que B sea cierto
+3. P(A|B) es la probabilidad de que A sea cierto en función de B
+4. P(B|A) es la probabilidad de que B sea cierto en función de A
+
+Teniendo esto en cuenta, procedemos a la realización del modelo usando Naive Bayes
 
 Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
 ```{r}
@@ -106,7 +120,7 @@ predict = predict(nb, data_test, type="prob")
 predict
 ```
 
-## SVM - Máquinas de vectores de soporte 
+## Clasificación mediante máquinas de vectores de soporte 
 
 Fuentes: https://www.diegocalvo.es/svm-maquinas-de-vectores-de-soporte-en-r/
 
