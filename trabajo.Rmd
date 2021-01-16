@@ -317,3 +317,24 @@ hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=3000000")
 ```
 
 Podemos observar como siempre obtenemos 1 cluster independientemente del valor del eps
+
+
+# Heatmaps (https://rpubs.com/Joaquin_AR/310338)
+
+Los heatmaps son el resultado obtenido al representar una matriz de valores en la que, en lugar de números, se muestra un gradiente de color proporcional al valor de cada variable en cada posición. Se consigue representar más información que con un simple dendrograma y se facilita la identificación visual de posibles patrones característicos de cada cluster.
+
+Cargamos los datos
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE, row.names = 1,
+                  as.is=TRUE)
+data$Seasson <- NULL
+head(data)
+```
+
+
+```{r}
+data <- as.matrix(data)
+colores <- colorRampPalette(c("pink", "white", "blue"))(256)
+heatmap(x = data, scale = "none", col = colores, cexRow = 0.7)
+```
+
