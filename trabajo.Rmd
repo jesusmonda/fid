@@ -136,16 +136,20 @@ prediccion <- predict(modelo,new=data) #Hay que inventar
 
 # Predicción no supervisada
 
+Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
+
 ## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
 
-La agrupación en R es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de grupos es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. 
 
-K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de conglomerados es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. Este algoritmo también descubre el centroide del cúmulo.
+K-means consiste en una agrupación de datos, y la agrupación es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+
 
 Cargamos librerias
 ```{r}
 library(ggplot2)
 ```
+
 Cargamos y visualizamos los datos
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
@@ -154,14 +158,24 @@ head(data)
 ggplot(data, aes(New.cases, Deaths, Recovered, color = Seasson)) + geom_point()
 
 ```
-Interpretamos los datos. Podemos obsevar como hay 3 grupos. (1 = invierno, 2 = primavera,3 = verano)
+
+Al interpretar los datos, podemos obsevar como hay 3 grupos de datos. (1 = invierno, 2 = primavera, 3 = verano)
+
+Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seassons: 
 ```{r}
-km.out <- kmeans(data[0:15], centers = 3, nstart = 20)
 summary(km.out) # Inspect the result
+km.out <- kmeans(data[0:15], centers = 2, nstart = 20)
+print(km.out)
 plot(data, 
   col = km.out$cluster,
-  main = "k-means with 3 clusters")
+  main = "k-means with 2 clusters")
 ```
+
+La suma de las distancias al cuadrado de cada observación con la media de la muestra global, obtenemos total_SS.
+La suma de las distancias cuadradas de estas tres medias a la media general, obtenemos between_SS.
+
+Como podemos observar hay un buen ratio BSS/TSS, ya que es del 75.9 %. Pero se podría mejorar.
+
 Necesitamos elegir k, el número de clusters. 
 Hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
 ```{r}
@@ -172,20 +186,26 @@ for (i in 1:15) {
 }
 plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
 ```
-
+Como se puede ver en la gráfica empieza a decrementar en x=3, por lo que emplearemos k = 3.
 ```{r}
 k <- 3
 km <- kmeans(data[0:15], centers = k, nstart = 20)
+print(km)
 plot(data,
      col = km$cluster,
      main = paste("k-means clustering with", k, "clusters"))
 
 table(km$cluster, data$Seasson)
 ```
-Visualizar el resultado:
+Al emplear k = 3 se ha obtenido un ratio BSS/TSS mejor del 90%.
+
+Visualizamos el resultado:
 ```{r}
 ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point()
 ```
+Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seassons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seassons.
+
+
 ## 2. Principal component analysis (https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
