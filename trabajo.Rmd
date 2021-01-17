@@ -29,7 +29,7 @@ library(caTools)
 data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 colnames(data_arbol)
 ```
-
+Hacemos validacion cruzada con arbol de decision
 ```{r}
 set.seed(1234)
 split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
@@ -46,17 +46,17 @@ folds <- createFolds(training_set$Season, k = 10)
 ```
 
 ```{r}
-library(rpart)
 cvDecisionTree <- lapply(folds, function(x){
   training_fold <- training_set[-x, ]
   test_fold <- training_set[x, ]
   clasificador <- rpart(Season ~ ., data = training_fold)
-  rpart.plot(clasificador)
   y_pred <- predict(clasificador, newdata = test_fold, type = 'class')
   cm <- table(test_fold$Season, y_pred)
   precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
-  return(clasificador)
+  return(precision)
 })
+precisionDecisionTree  <- mean(as.numeric(cvDecisionTree))
+precisionDecisionTree 
 
 
 ```
@@ -105,13 +105,31 @@ library(naivebayes)
 Cargamos los datos
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+data 
+training_set
 ```
 
 E introducimos los datos, es importante factorizar la propiedad de "Season" para que funcione la función
 ```{r}
-nb <- naive_bayes(as.factor(Seasson) ~ New.cases + New.deaths + New.recovered, data)
+nb <- naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, data)
 
 plot(nb)
+```
+Validacion cruzada de naive bayes
+##  TODO preguntar si poner las tablas de probabilidades de cada una de las iteraciones
+```{r}
+
+cvNaiveBayes <- lapply(folds, function(x){
+  training_fold <- training_set[-x, ]
+  test_fold <- training_set[x, ]
+  clasificador <-  naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, training_fold)
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$Season, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
+precisionNaiveBayes
 ```
 
 Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra el valor medio que tienen estos atributos para cada estación
@@ -155,8 +173,25 @@ library(e1071)
 # Ejecución del modelo SVM
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 
-dat = data.frame(x= data$New.cases, y = as.factor(data$Seasson))
-modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
+dat = data.frame(x= data$New.cases, y = as.factor(data$Season))
+modelo = svm(as.factor(Season) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
+
+```
+
+Validacion cruzada de svm
+```{r}
+library(e1071)
+cvKernelSVM <- lapply(folds, function(x){
+  training_fold <- training_set[-x, ]
+  test_fold <- training_set[x, ]
+  clasificador <- svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE)
+  prediccion <- predict(svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE),new=training_set)
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$Season, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(clasificador)
+})
+cvKernelSVM
 
 ```
 
@@ -166,7 +201,7 @@ Ahora mediante el dataset de testeo probaremos la capacidad de predicción de es
 ```{r}
 prediccion <- predict(modelo,new=data) #Hay que inventar
 
-(mc <- with(data,(table(prediccion,Seasson))))
+(mc <- with(data,(table(prediccion,Season))))
 ```
 
 
