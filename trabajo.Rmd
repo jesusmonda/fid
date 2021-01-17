@@ -353,8 +353,6 @@ data <- scale(data)
 Podemos observar como la columna Seasons tiene 3 cluster a diferencia de las demas columnas.
 ```{r}
 Heatmap(matrix = data, name = "Clusters",
-        row_title = "observaciones",
-        column_title = "variables",
         row_names_gp = gpar(fontsize = 7),
         clustering_distance_columns = "euclidean",
         clustering_distance_rows = "euclidean",
