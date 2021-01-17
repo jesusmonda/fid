@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Trabajo FID
 
 El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
@@ -287,3 +288,376 @@ biplot(irispca)
 var <- irispca$sdev^2
 (pve <- var/sum(var))
 ```
+=======
+# Trabajo FID
+
+El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
+
+# Predicción supervisada
+
+Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
+Trataremos de predecir la estación del año a la que pertenece el dato, teniendo en cuenta los casos, las muertes y las recuperaciones diarias.
+
+## Clasificación mediante árbol
+
+Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
+
+Instalamos la librería rattle para poder hacer la predicción mediante árbol
+
+```{r}
+install.packages("rattle")
+```
+
+Cargamos el paquete
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+```{r}
+data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+colnames(data)
+```
+
+Ahora vamos a generar y a dibujar el árbol
+```{r}
+tree <- rpart(Seasson ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
+rpart.plot(tree)
+```
+ 
+#TODO
+
+Ahora vamos a cargar los datos de testeo para poder probar la capacidad de predicción del árbol generado
+```{r}
+test <- read.delim('datos/arbol_test.csv', sep=",", head = TRUE)
+colnames(data)
+```
+
+Ahora vamos a predecir los valores del conjunto de test y obtener la matriz de confusión y acurracy
+```{r}
+pred <- predict(tree, test, type="class")
+conf <- table(test$Confirmed, pred)
+View(conf)
+
+acc <- sum(diag(conf)) / sum(conf)
+print(acc)
+```
+ 
+## Clasificación mediante Naive Bayes
+
+Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html, https://rpubs.com/riazakhan94/naive_bayes_classifier_e1071
+
+Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí. La formula de Bayes es:
+
+$$
+P(B|A) = \frac{P(A|B)*P(B)}{P(A)}
+$$
+Donde:
+
+1. P(A) es la probabilidad de que A sea cierto
+2. P(B) es la probabildiad de que B sea cierto
+3. P(A|B) es la probabilidad de que A sea cierto en función de B
+4. P(B|A) es la probabilidad de que B sea cierto en función de A
+
+Teniendo esto en cuenta, procedemos a la realización del modelo usando Naive Bayes
+
+Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
+```{r}
+install.packages("naivebayes")
+```
+
+Después cargamos el paquete
+```{r}
+library(naivebayes)
+```
+
+Cargamos los datos
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+```
+
+E introducimos los datos, es importante factorizar la propiedad de "Season" para que funcione la función
+```{r}
+nb <- naive_bayes(as.factor(Seasson) ~ New.cases + New.deaths + New.recovered, data)
+
+plot(nb)
+```
+
+Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra el valor medio que tienen estos atributos para cada estación
+```{r}
+nb$tables
+```
+De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
+
+#TODO
+
+Ahora vamos a comprobar que es capaz de predecir este modelo.
+
+```{r}
+data_test = data[1,]
+data_test$New.cases = 1000
+data_test$New.deaths = 2000
+data_test$New.recovered = 5000
+predict = predict(nb, data_test, type="prob")    
+predict
+
+```
+```{r}
+data_test = data[1,]
+data_test$New.cases = 500
+data_test$New.deaths = 20000
+data_test$New.recovered = 5000
+predict = predict(nb, data_test, type="prob")    
+predict
+```
+
+## Clasificación mediante máquinas de vectores de soporte 
+
+Fuentes: https://www.diegocalvo.es/svm-maquinas-de-vectores-de-soporte-en-r/
+
+Este método de clasificación se basa en la busqueda un hiperplano que separe de forma óptima a todos los puntos de una clase, clasificandolos.
+El algoritmo de SVM tratará de buscar el hiperplano que tenga la máxima distancia posible con los puntos, de esta forma se podrá hacer una mejor clasificación de los datos, 
+etiquetando cada dato dependiendo de en que lado del hiperplano se encuentra.
+
+```{r}
+library(e1071)
+# Ejecución del modelo SVM
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+
+dat = data.frame(x= data$New.cases, y = as.factor(data$Seasson))
+modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
+
+```
+
+#TODO
+
+Ahora mediante el dataset de testeo probaremos la capacidad de predicción de este modelo.
+```{r}
+prediccion <- predict(modelo,new=data) #Hay que inventar
+
+(mc <- with(data,(table(prediccion,Seasson))))
+```
+
+
+# Predicción no supervisada
+
+Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
+
+## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
+
+K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de grupos es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. 
+
+K-means consiste en una agrupación de datos, y la agrupación es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+
+
+Cargamos librerias
+```{r}
+library(ggplot2)
+```
+
+Cargamos y visualizamos los datos
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+head(data)
+
+ggplot(data, aes(New.cases, Deaths, Recovered, color = Seasson)) + geom_point()
+
+```
+
+Al interpretar los datos, podemos obsevar como hay 3 grupos de datos. (1 = invierno, 2 = primavera, 3 = verano)
+
+Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seassons: 
+```{r}
+summary(km.out) # Inspect the result
+km.out <- kmeans(data[0:15], centers = 2, nstart = 20)
+print(km.out)
+plot(data, 
+  col = km.out$cluster,
+  main = "k-means with 2 clusters")
+```
+
+La suma de las distancias al cuadrado de cada observación con la media de la muestra global, obtenemos total_SS.
+La suma de las distancias cuadradas de estas tres medias a la media general, obtenemos between_SS.
+
+Como podemos observar hay un buen ratio BSS/TSS, ya que es del 75.9 %. Pero se podría mejorar.
+
+Necesitamos elegir k, el número de clusters. 
+Hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
+```{r}
+wss <- 0
+for (i in 1:15) {
+  km.out <- kmeans(x = data[0:15], centers = i, nstar=20)
+  wss[i] <- km.out$tot.withinss
+}
+plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
+```
+Como se puede ver en la gráfica empieza a decrementar en x=3, por lo que emplearemos k = 3.
+```{r}
+k <- 3
+km <- kmeans(data[0:15], centers = k, nstart = 20)
+print(km)
+plot(data,
+     col = km$cluster,
+     main = paste("k-means clustering with", k, "clusters"))
+
+table(km$cluster, data$Seasson)
+```
+Al emplear k = 3 se ha obtenido un ratio BSS/TSS mejor del 90%.
+
+Visualizamos el resultado:
+```{r}
+ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point()
+```
+Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seassons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seassons.
+
+
+## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
+```{r}
+install.packages("FactoMineR")
+library("FactoMineR")
+```
+
+PCA es una de las técnicas de aprendizaje no supervisado, las cuales suelen aplicarse como parte del análisis exploratorio de los datos.
+
+Una de las aplicaciones de PCA es como herramienta para la visualización de datos.
+
+Cargamos los datos:
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
+head(data)
+```
+
+Antes de aplicar un PCA, las observaciones tienen que moverse al centro del eje de coordenadas, esto es, centrarlas para que tengan media 0, para así eliminar posibles bias en las mediciones.
+La función prcomp() es una de las múltiples funciones en R que realizan PCA, prcomp() centra las variables para que tengan media 0
+```{r}
+pca <- prcomp(data)
+```
+
+Otro de los outputs de la función prcomp() es la desviación estándar de cada componente principal:
+```{r}
+pca$sdev
+```
+
+La varianza explicada por cada componente principal la obtenemos elevando al cuadrado la desviación estándar:
+```{r}
+pca$sdev^2
+```
+
+Aplicamos PCA
+```{r}
+pca2.nci <- PCA(X = data, scale.unit = TRUE, ncp = 64, graph = FALSE)
+```
+
+Mostramos dos ejemplos para representar las observaciones sobre las dos primeras componentes principales:
+```{r}
+library(factoextra)
+fviz_pca_ind(pca, geom.ind = "point", 
+             col.ind = "#FC4E07", 
+             axes = c(1, 2), 
+             pointsize = 1.5) 
+```
+
+# DBSCAN (https://rpubs.com/elias_jurgen/605966)
+```{r}
+install.packages("dbscan")
+library("dbscan")
+```
+Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
+
+Este método necesita sólo dos parámetros
+  ·eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente”   basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
+  
+  ·minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número   se puede elegir basándose en el número de dimensiones del dataset.
+  
+  ·D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca    es menor que 3
+
+Cargamos los datos: Sólo hay 3 tipos de seassons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seassons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+data$Seasson <- NULL
+head(data)
+```
+
+Ahora, para elegir el radio de los grupos utilizaremos un K-Distance Plot.
+```{r}
+#df: dataset sin variable "species"
+#k: el número mínimo de puntos que elegimos
+
+kNNdistplot(data, k = 15)
+abline(h = 1000000, lty = 2)
+```
+
+# eps=1000000
+Por lo que se observa en la gráfica tomaremos eps=1000000
+
+Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+```{r}
+cl<-dbscan(data,eps=1000000,MinPts = 5)
+unique(cl$cluster)
+hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=1000000")
+```
+
+# eps=3000000
+Tomaremos eps=3000000
+
+Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+```{r}
+cl<-dbscan(data,eps=3000000,MinPts = 5)
+unique(cl$cluster)
+hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=3000000")
+```
+
+Podemos observar como siempre obtenemos 1 cluster independientemente del valor del eps
+
+Por ultimo, hacemos la prueba con muchos valores de eps y mostramos el numero de cluster devuelto. Los valores de eps van desde 1000000 hasta 5000000, lo sabemos gracias a la grafica anterior generada mediante kNNdistplot, pero de 1000 en 1000 para agilizar el proceso. Podemos observar como siempre devuelve 1 cluster.
+```{r}
+wss <- 0
+value <- 0
+i <- 1000000
+index <- 0
+while(i<=5000000) {
+  km.out <- dbscan(data,eps=i,MinPts = 5)
+  wss[index] <- km.out$cluster
+  value[index] <- i
+  i<-i+1000
+  index <- index + 1
+}
+plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
+```
+
+# Heatmaps (https://rpubs.com/Joaquin_AR/310338)
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ComplexHeatmap")
+library(ComplexHeatmap)
+install.packages("viridis")
+library(viridis)
+colores <- magma(256)
+```
+
+Los heatmaps son el resultado obtenido al representar una matriz de valores en la que, en lugar de números, se muestra un gradiente de color proporcional al valor de cada variable en cada posición. Se consigue representar más información que con un simple dendrograma y se facilita la identificación visual de posibles patrones característicos de cada cluster.
+
+Cargamos los datos
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE, row.names = 1,
+                  as.is=TRUE)
+data$Seasson <- as.numeric(as.factor(data$Seasson))
+head(data)
+data <- as.matrix(data)
+data <- scale(data)
+```
+Podemos observar como la columna Seassons tiene 3 cluster a diferencia de las demas columnas.
+```{r}
+Heatmap(matrix = data, name = "Clusters",
+        row_title = "observaciones",
+        column_title = "variables",
+        row_names_gp = gpar(fontsize = 7),
+        clustering_distance_columns = "euclidean",
+        clustering_distance_rows = "euclidean",
+        clustering_method_columns = "average",
+        clustering_method_rows = "average")
+```
+
+>>>>>>> 8b7f3618fd7a18f57a70913c6649b34d5575fdb7
