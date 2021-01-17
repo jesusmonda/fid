@@ -29,7 +29,6 @@ library(caTools)
 
 ```{r}
 data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-colnames(data)
 ```
 
 Ahora vamos a generar y a dibujar el árbol
@@ -37,7 +36,8 @@ Ahora vamos a generar y a dibujar el árbol
 tree <- rpart(Season ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
 rpart.plot(tree)
 ```
- Hacemos validacion cruzada con arbol de decision
+
+Hacemos validacion cruzada con arbol de decision
 ```{r}
 set.seed(1234)
 split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
@@ -67,23 +67,6 @@ precisionDecisionTree  <- mean(as.numeric(cvDecisionTree))
 precisionDecisionTree 
 
 
-```
-#TODO
-
-Ahora vamos a cargar los datos de testeo para poder probar la capacidad de predicción del árbol generado
-```{r}
-test <- read.delim('datos/arbol_test.csv', sep=",", head = TRUE)
-colnames(data)
-```
-
-Ahora vamos a predecir los valores del conjunto de test y obtener la matriz de confusión y acurracy
-```{r}
-pred <- predict(tree, test, type="class")
-conf <- table(test$Confirmed, pred)
-View(conf)
-
-acc <- sum(diag(conf)) / sum(conf)
-print(acc)
 ```
  
 ## Clasificación mediante Naive Bayes
@@ -149,28 +132,6 @@ precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
 precisionNaiveBayes
 ```
 
-#TODO
-
-Ahora vamos a comprobar que es capaz de predecir este modelo.
-
-```{r}
-data_test = data[1,]
-data_test$New.cases = 1000
-data_test$New.deaths = 2000
-data_test$New.recovered = 5000
-predict = predict(nb, data_test, type="prob")    
-predict
-
-```
-```{r}
-data_test = data[1,]
-data_test$New.cases = 500
-data_test$New.deaths = 20000
-data_test$New.recovered = 5000
-predict = predict(nb, data_test, type="prob")    
-predict
-```
-
 ## Clasificación mediante máquinas de vectores de soporte 
 
 Fuentes: https://www.diegocalvo.es/svm-maquinas-de-vectores-de-soporte-en-r/
@@ -189,14 +150,7 @@ modelo = svm(as.factor(Season) ~ ., data = data, kernel = "linear", cost = 10, s
 
 ```
 
-#TODO
 
-Ahora mediante el dataset de testeo probaremos la capacidad de predicción de este modelo.
-```{r}
-prediccion <- predict(modelo,new=data) #Hay que inventar
-
-(mc <- with(data,(table(prediccion,Season))))
-```
 Validacion cruzada de svm
 ```{r}
 library(e1071)
