@@ -318,8 +318,33 @@ hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=3000000")
 
 Podemos observar como siempre obtenemos 1 cluster independientemente del valor del eps
 
+Por ultimo, hacemos la prueba con muchos valores de eps y mostramos el numero de cluster devuelto. Los valores de eps van desde 1000000 hasta 5000000, lo sabemos gracias a la grafica anterior generada mediante kNNdistplot, pero de 1000 en 1000 para agilizar el proceso. Podemos observar como siempre devuelve 1 cluster.
+```{r}
+wss <- 0
+value <- 0
+i <- 1000000
+index <- 0
+while(i<=5000000) {
+  km.out <- dbscan(data,eps=i,MinPts = 5)
+  wss[index] <- km.out$cluster
+  value[index] <- i
+  i<-i+1000
+  index <- index + 1
+}
+plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
+```
 
 # Heatmaps (https://rpubs.com/Joaquin_AR/310338)
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ComplexHeatmap")
+library(ComplexHeatmap)
+install.packages("viridis")
+library(viridis)
+colores <- magma(256)
+```
 
 Los heatmaps son el resultado obtenido al representar una matriz de valores en la que, en lugar de números, se muestra un gradiente de color proporcional al valor de cada variable en cada posición. Se consigue representar más información que con un simple dendrograma y se facilita la identificación visual de posibles patrones característicos de cada cluster.
 
@@ -327,22 +352,20 @@ Cargamos los datos
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE, row.names = 1,
                   as.is=TRUE)
-data$Seasson <- NULL
+data$Seasson <- as.numeric(as.factor(data$Seasson))
 head(data)
-```
-
-
-```{r}
 data <- as.matrix(data)
-
-
-
-install.packages("gplots")
-library(gplots)
-heatmap.2(x = data, scale = "none", col = bluered(256),
-          distfun = function(x){dist(x, method = "euclidean")},
-          hclustfun = function(x){hclust(x, method = "average")},
-          density.info = "none",
-          trace = "none", cexRow = 0.7)
+data <- scale(data)
+```
+Podemos observar como la columna Seassons tiene 3 cluster a diferencia de las demas columnas.
+```{r}
+Heatmap(matrix = data, name = "Clusters",
+        row_title = "observaciones",
+        column_title = "variables",
+        row_names_gp = gpar(fontsize = 7),
+        clustering_distance_columns = "euclidean",
+        clustering_distance_rows = "euclidean",
+        clustering_method_columns = "average",
+        clustering_method_rows = "average")
 ```
 
