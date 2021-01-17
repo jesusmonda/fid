@@ -295,7 +295,7 @@ fviz_pca_ind(pca, geom.ind = "point",
 install.packages("dbscan")
 library("dbscan")
 ```
-Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
+Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físico. Este algoritmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
 
 Este método necesita sólo dos parámetros
   ·eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente”   basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
@@ -346,13 +346,28 @@ Por ultimo, hacemos la prueba con muchos valores de eps y mostramos el numero de
 ```{r}
 wss <- 0
 value <- 0
-i <- 1000000
+i <- 0
 index <- 0
-while(i<=5000000) {
+while(i<=4000000) {
   km.out <- dbscan(data,eps=i,MinPts = 5)
   wss[index] <- km.out$cluster
   value[index] <- i
   i<-i+1000
+  index <- index + 1
+}
+plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
+```
+Ahora probamos con valores más pequeños pero tampoco obtenemos un número correcto de cluster
+```{r}
+wss <- 0
+value <- 0
+i <- 0
+index <- 0
+while(i<=500) {
+  km.out <- dbscan(data,eps=i,MinPts = 5)
+  wss[index] <- km.out$cluster
+  value[index] <- i
+  i<-i+0.1
   index <- index + 1
 }
 plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
