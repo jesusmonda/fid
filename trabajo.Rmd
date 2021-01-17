@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Trabajo FID
 
 El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
@@ -8,7 +7,9 @@ El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report
 Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
 Trataremos de predecir la estación del año a la que pertenece el dato, teniendo en cuenta los casos, las muertes y las recuperaciones diarias.
 
-## CLASIFICACIÓN MEDIANTE ÁRBOL
+## Clasificación mediante árbol
+
+Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
 
 Instalamos la librería rattle para poder hacer la predicción mediante árbol
 
@@ -28,9 +29,15 @@ library(caTools)
 
 ```{r}
 data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-colnames(data_arbol)
+colnames(data)
 ```
-Hacemos validacion cruzada con arbol de decision
+
+Ahora vamos a generar y a dibujar el árbol
+```{r}
+tree <- rpart(Season ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
+rpart.plot(tree)
+```
+ Hacemos validacion cruzada con arbol de decision
 ```{r}
 set.seed(1234)
 split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
@@ -61,270 +68,6 @@ precisionDecisionTree
 
 
 ```
-
-
-Ahora vamos a generar y a dibujar el árbol
-```{r}
-tree <- rpart(Season ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
-rpart.plot(tree)
-```
- 
-#TODO
-
-Ahora vamos a cargar los datos de testeo para poder probar la capacidad de predicción del árbol generado
-```{r}
-test <- read.delim('datos/arbol_test.csv', sep=",", head = TRUE)
-colnames(data)
-```
-
-Ahora vamos a predecir los valores del conjunto de test y obtener la matriz de confusión y acurracy
-```{r}
-pred <- predict(tree, test, type="class")
-conf <- table(test$Confirmed, pred)
-View(conf)
-
-acc <- sum(diag(conf)) / sum(conf)
-print(acc)
-```
- 
-## Naive Bayes
-
-Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html
-
-Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí
-
-Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
-```{r}
-install.packages("naivebayes")
-```
-
-Después cargamos el paquete
-```{r}
-library(naivebayes)
-```
-
-Cargamos los datos
-```{r}
-data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-data 
-training_set
-```
-
-E introducimos los datos, es importante factorizar la propiedad de "Season" para que funcione la función
-```{r}
-nb <- naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, data)
-
-plot(nb)
-```
-Validacion cruzada de naive bayes
-##  TODO preguntar si poner las tablas de probabilidades de cada una de las iteraciones
-```{r}
-
-cvNaiveBayes <- lapply(folds, function(x){
-  training_fold <- training_set[-x, ]
-  test_fold <- training_set[x, ]
-  clasificador <-  naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, training_fold)
-  y_pred <- predict(clasificador, newdata = test_fold)
-  cm <- table(test_fold$Season, y_pred)
-  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
-  return(precision)
-})
-precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
-precisionNaiveBayes
-```
-
-Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra el valor medio que tienen estos atributos para cada estación
-```{r}
-nb$tables
-```
-De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
-
-#TODO
-
-Ahora vamos a comprobar que es capaz de predecir este modelo.
-
-```{r}
-data_test = data[1,]
-data_test$New.cases = 1000
-data_test$New.deaths = 2000
-data_test$New.recovered = 5000
-predict = predict(nb, data_test, type="prob")    
-predict
-
-```
-```{r}
-data_test = data[1,]
-data_test$New.cases = 500
-data_test$New.deaths = 20000
-data_test$New.recovered = 5000
-predict = predict(nb, data_test, type="prob")    
-predict
-```
-
-## SVM - Máquinas de vectores de soporte 
-
-Fuentes: https://www.diegocalvo.es/svm-maquinas-de-vectores-de-soporte-en-r/
-
-Este método de clasificación se basa en la busqueda un hiperplano que separe de forma óptima a todos los puntos de una clase, clasificandolos.
-El algoritmo de SVM tratará de buscar el hiperplano que tenga la máxima distancia posible con los puntos, de esta forma se podrá hacer una mejor clasificación de los datos, 
-etiquetando cada dato dependiendo de en que lado del hiperplano se encuentra.
-
-```{r}
-library(e1071)
-# Ejecución del modelo SVM
-data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-
-dat = data.frame(x= data$New.cases, y = as.factor(data$Season))
-modelo = svm(as.factor(Season) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
-
-```
-
-Validacion cruzada de svm
-```{r}
-library(e1071)
-cvKernelSVM <- lapply(folds, function(x){
-  training_fold <- training_set[-x, ]
-  test_fold <- training_set[x, ]
-  clasificador <- svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE)
-  prediccion <- predict(svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE),new=training_set)
-  y_pred <- predict(clasificador, newdata = test_fold)
-  cm <- table(test_fold$Season, y_pred)
-  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
-  return(clasificador)
-})
-cvKernelSVM
-
-```
-
-#TODO
-
-Ahora mediante el dataset de testeo probaremos la capacidad de predicción de este modelo.
-```{r}
-prediccion <- predict(modelo,new=data) #Hay que inventar
-
-(mc <- with(data,(table(prediccion,Season))))
-```
-
-
-# Predicción no supervisada
-
-## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
-```{r}
-#La agrupación en R es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
-
-#K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de conglomerados es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. Este algoritmo también descubre el centroide del cúmulo.
-
-data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
-data$Deaths <- NULL
-data$Recovered <- NULL
-data$Active <- NULL
-data$New.cases <- NULL
-data$New.deaths <- NULL
-data$New.recovered <- NULL
-data$Deaths...100.Cases <- NULL
-data$Deaths...100.Recovered <- NULL
-data$No..of.countries <- NULL
-data$New.Cases.gt.5000 <- NULL
-data$New.Deaths.gt.5000 <- NULL
-data$New.Recover.gt.5000 <- NULL
-data$Date <- NULL
-data$Recovered...100.Cases <- NULL
-head(data)
-
-# Interpetar los datos, podemos obsevar como hay claramente 3 grupos. (1 = invierno, 2 = primavera,3 = verano)
-km.out <- kmeans(data, centers = 3, nstart = 20)
-summary(km.out) # Inspect the result
-plot(data, 
-  col = km.out$cluster,
-  main = "k-means with 3 clusters",
-  xlab = "Confirmados", ylab = "Epoca")
-
-# Determinar el numero de cluster
-wss <- 0
-for (i in 1:15) {
-  km.out <- kmeans(x = data, centers = i, nstar=20)
-  wss[i] <- km.out$tot.withinss
-}
-plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
-
-# Hay un punto dulce donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso es 4
-
-k <- 4
-km <- kmeans(data, centers = k, nstart = 20, iter.max = 50)
-plot(data,
-     col = km$cluster,
-     main = paste("k-means clustering with", k, "clusters"),
-     xlab = "Confirmados", ylab = "Epoca")
-```
-## 2. Principal component analysis (https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
-```{r}
-data <- read.delim('datos_nuevos_casos/regresion_train_kmeans.csv', sep=",", head = TRUE)
-data$Deaths <- NULL
-data$Recovered <- NULL
-data$Active <- NULL
-data$New.cases <- NULL
-data$New.deaths <- NULL
-data$New.recovered <- NULL
-data$Deaths...100.Cases <- NULL
-data$Deaths...100.Recovered <- NULL
-data$No..of.countries <- NULL
-data$New.Cases.gt.5000 <- NULL
-data$New.Deaths.gt.5000 <- NULL
-data$New.Recover.gt.5000 <- NULL
-data$Date <- NULL
-data$Recovered...100.Cases <- NULL
-head(data)
-
-pairs(data[, -5], pch = 19)
-
-# Ahora vamos a reducir las dimensiones
-irispca <- prcomp(data[, -5])
-summary(irispca)
-
-# Un biplot presenta todos los puntos originales re-mapeados (rotados) a lo largo de las dos primeras PCs, así como las características originales como vectores a lo largo de las mismas PCs.
-
-# Extraemos las desviaciones estándar del resultado del PCA para calcular las desviaciones, y luego obtengo el porcentaje y la varianza acumulada a lo largo de los PC.
-biplot(irispca)
-var <- irispca$sdev^2
-(pve <- var/sum(var))
-```
-=======
-# Trabajo FID
-
-El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
-
-# Predicción supervisada
-
-Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
-Trataremos de predecir la estación del año a la que pertenece el dato, teniendo en cuenta los casos, las muertes y las recuperaciones diarias.
-
-## Clasificación mediante árbol
-
-Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
-
-Instalamos la librería rattle para poder hacer la predicción mediante árbol
-
-```{r}
-install.packages("rattle")
-```
-
-Cargamos el paquete
-```{r}
-library(rpart)
-library(rpart.plot)
-```
-
-```{r}
-data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-colnames(data)
-```
-
-Ahora vamos a generar y a dibujar el árbol
-```{r}
-tree <- rpart(Seasson ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
-rpart.plot(tree)
-```
- 
 #TODO
 
 Ahora vamos a cargar los datos de testeo para poder probar la capacidad de predicción del árbol generado
@@ -378,7 +121,7 @@ data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRU
 
 E introducimos los datos, es importante factorizar la propiedad de "Season" para que funcione la función
 ```{r}
-nb <- naive_bayes(as.factor(Seasson) ~ New.cases + New.deaths + New.recovered, data)
+nb <- naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, data)
 
 plot(nb)
 ```
@@ -388,6 +131,23 @@ Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra 
 nb$tables
 ```
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
+
+Validacion cruzada de naive bayes
+##  TODO preguntar si poner las tablas de probabilidades de cada una de las iteraciones
+```{r}
+
+cvNaiveBayes <- lapply(folds, function(x){
+  training_fold <- training_set[-x, ]
+  test_fold <- training_set[x, ]
+  clasificador <-  naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, training_fold)
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$Season, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
+precisionNaiveBayes
+```
 
 #TODO
 
@@ -424,8 +184,8 @@ library(e1071)
 # Ejecución del modelo SVM
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 
-dat = data.frame(x= data$New.cases, y = as.factor(data$Seasson))
-modelo = svm(as.factor(Seasson) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
+dat = data.frame(x= data$New.cases, y = as.factor(data$Season))
+modelo = svm(as.factor(Season) ~ ., data = data, kernel = "linear", cost = 10, scale = FALSE)
 
 ```
 
@@ -435,9 +195,27 @@ Ahora mediante el dataset de testeo probaremos la capacidad de predicción de es
 ```{r}
 prediccion <- predict(modelo,new=data) #Hay que inventar
 
-(mc <- with(data,(table(prediccion,Seasson))))
+(mc <- with(data,(table(prediccion,Season))))
 ```
+Validacion cruzada de svm
+```{r}
+library(e1071)
+cvKernelSVM <- lapply(folds, function(x){
+  training_fold <- training_set[-x, ]
+  test_fold <- training_set[x, ]
+  clasificador <- svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE)
+  prediccion <- predict(clasificador,new=training_set)
+  mc <- with(training_set,(table(prediccion,Season)))
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$Season, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
 
+precisionKernelSVM <- mean(as.numeric(cvKernelSVM))
+precisionKernelSVM
+
+```
 
 # Predicción no supervisada
 
@@ -460,13 +238,13 @@ Cargamos y visualizamos los datos
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 head(data)
 
-ggplot(data, aes(New.cases, Deaths, Recovered, color = Seasson)) + geom_point()
+ggplot(data, aes(New.cases, Deaths, Recovered, color = Season)) + geom_point()
 
 ```
 
 Al interpretar los datos, podemos obsevar como hay 3 grupos de datos. (1 = invierno, 2 = primavera, 3 = verano)
 
-Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seassons: 
+Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seasons: 
 ```{r}
 summary(km.out) # Inspect the result
 km.out <- kmeans(data[0:15], centers = 2, nstart = 20)
@@ -500,15 +278,16 @@ plot(data,
      col = km$cluster,
      main = paste("k-means clustering with", k, "clusters"))
 
-table(km$cluster, data$Seasson)
+table(km$cluster, data$Season)
 ```
+
 Al emplear k = 3 se ha obtenido un ratio BSS/TSS mejor del 90%.
 
 Visualizamos el resultado:
 ```{r}
 ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point()
 ```
-Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seassons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seassons.
+Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seasons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seasons.
 
 
 ## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
@@ -571,10 +350,10 @@ Este método necesita sólo dos parámetros
   
   ·D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca    es menor que 3
 
-Cargamos los datos: Sólo hay 3 tipos de seassons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seassons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
+Cargamos los datos: Sólo hay 3 tipos de Seasons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seasons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
-data$Seasson <- NULL
+data$Season <- NULL
 head(data)
 ```
 
@@ -643,12 +422,12 @@ Cargamos los datos
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE, row.names = 1,
                   as.is=TRUE)
-data$Seasson <- as.numeric(as.factor(data$Seasson))
+data$Season <- as.numeric(as.factor(data$Season))
 head(data)
 data <- as.matrix(data)
 data <- scale(data)
 ```
-Podemos observar como la columna Seassons tiene 3 cluster a diferencia de las demas columnas.
+Podemos observar como la columna Seasons tiene 3 cluster a diferencia de las demas columnas.
 ```{r}
 Heatmap(matrix = data, name = "Clusters",
         row_title = "observaciones",
