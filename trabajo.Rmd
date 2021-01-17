@@ -439,4 +439,3 @@ Heatmap(matrix = data, name = "Clusters",
         clustering_method_rows = "average")
 ```
 
->>>>>>> 8b7f3618fd7a18f57a70913c6649b34d5575fdb7
