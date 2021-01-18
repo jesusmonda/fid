@@ -40,23 +40,21 @@ rpart.plot(tree)
 Hacemos validacion cruzada con arbol de decision
 ```{r}
 set.seed(1234)
-split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
-training_set <- subset(data_arbol, split == TRUE)
-test_set <- subset(data_arbol, split == FALSE)
+data_set <- data_arbol
+
 ```
 
 ```{r}
-table(training_set$Season)
-table(test_set$Season)
+table(data_set$Season)
 ```
 ```{r}
-folds <- createFolds(training_set$Season, k = 10)
+folds <- createFolds(data_set$Season, k = 10)
 ```
 
 ```{r}
 cvDecisionTree <- lapply(folds, function(x){
-  training_fold <- training_set[-x, ]
-  test_fold <- training_set[x, ]
+  training_fold <- data_set[-x, ]
+  test_fold <- data_set[x, ]
   clasificador <- rpart(Season ~ ., data = training_fold)
   y_pred <- predict(clasificador, newdata = test_fold, type = 'class')
   cm <- table(test_fold$Season, y_pred)
@@ -120,8 +118,8 @@ Validacion cruzada de naive bayes
 ```{r}
 
 cvNaiveBayes <- lapply(folds, function(x){
-  training_fold <- training_set[-x, ]
-  test_fold <- training_set[x, ]
+  training_fold <- data_set[-x, ]
+  test_fold <- data_set[x, ]
   clasificador <-  naive_bayes(as.factor(Season) ~ New.cases + New.deaths + New.recovered, training_fold)
   y_pred <- predict(clasificador, newdata = test_fold)
   cm <- table(test_fold$Season, y_pred)
@@ -155,11 +153,11 @@ Validacion cruzada de svm
 ```{r}
 library(e1071)
 cvKernelSVM <- lapply(folds, function(x){
-  training_fold <- training_set[-x, ]
-  test_fold <- training_set[x, ]
+  training_fold <- data_set[-x, ]
+  test_fold <- data_set[x, ]
   clasificador <- svm(as.factor(Season) ~ ., data = training_fold, kernel = "linear", cost = 10, scale = FALSE)
-  prediccion <- predict(clasificador,new=training_set)
-  mc <- with(training_set,(table(prediccion,Season)))
+  prediccion <- predict(clasificador,new=data_set)
+  mc <- with(data_set,(table(prediccion,Season)))
   y_pred <- predict(clasificador, newdata = test_fold)
   cm <- table(test_fold$Season, y_pred)
   precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
