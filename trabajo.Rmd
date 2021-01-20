@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Trabajo FID
 
 El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
@@ -11,7 +16,6 @@ Miembros del equipo:
 * María del Carmen Arenas Zayas (mararezay) 
 * Jesús Monda Caña (jesmoncaa, jmonda) 
 
- 
 
 # Predicción supervisada
 
@@ -22,9 +26,10 @@ Trataremos de predecir la estación del año a la que pertenece el dato, teniend
 
 Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
 
+
 Instalamos la librería rattle para poder hacer la predicción mediante árbol
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 install.packages("rattle")
 install.packages("caret")
 install.packages("caTools")
@@ -101,7 +106,7 @@ Donde:
 Teniendo esto en cuenta, procedemos a la realización del modelo usando Naive Bayes
 
 Primero instalarmos el paquete naivebayes, además es necesario usar Rtools (https://cran.r-project.org/bin/windows/Rtools/)
-```{r}
+```{r eval=FALSE, include=FALSE}
 install.packages("naivebayes")
 ```
 
@@ -129,8 +134,7 @@ nb$tables
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
 
 Validacion cruzada de naive bayes
-##  TODO preguntar si poner las tablas de probabilidades de cada una de las iteraciones
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 cvNaiveBayes <- lapply(folds, function(x){
   training_fold <- training_set[-x, ]
@@ -217,8 +221,8 @@ Al interpretar los datos, podemos obsevar como hay 3 grupos de datos. (1 = invie
 
 Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seasons: 
 ```{r}
-summary(km.out) # Inspect the result
 km.out <- kmeans(data[0:15], centers = 2, nstart = 20)
+summary(km.out) # Inspect the result
 print(km.out)
 plot(data, 
   col = km.out$cluster,
@@ -262,8 +266,12 @@ Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los
 
 
 ## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 install.packages("FactoMineR")
+```
+
+```{r}
 library("FactoMineR")
 ```
 
@@ -308,8 +316,12 @@ fviz_pca_ind(pca, geom.ind = "point",
 ```
 
 ## DBSCAN (https://rpubs.com/elias_jurgen/605966)
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 install.packages("dbscan")
+```
+
+```{r}
 library("dbscan")
 ```
 Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
@@ -376,13 +388,17 @@ plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
 ```
 
 ## Heatmaps (https://rpubs.com/Joaquin_AR/310338)
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
 BiocManager::install("ComplexHeatmap")
-library(ComplexHeatmap)
 install.packages("viridis")
+```
+
+
+```{r}
+library(ComplexHeatmap)
 library(viridis)
 colores <- magma(256)
 ```
