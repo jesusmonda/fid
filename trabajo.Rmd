@@ -2,6 +2,17 @@
 
 El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
 
+Alcance del proyecto: Análisis avanzado e investigación BIGML.
+GitHub: https://github.com/jesusmonda/fid
+
+Miembros del equipo:  
+* Roberto Hermoso Núñez (robhernun) 
+* Pablo García Barco (pabgarbar) 
+* María del Carmen Arenas Zayas (mararezay) 
+* Jesús Monda Caña (jesmoncaa, jmonda) 
+
+ 
+
 # Predicción supervisada
 
 Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
