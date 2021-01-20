@@ -53,7 +53,7 @@ tree <- rpart(Season ~ New.cases + New.deaths + New.recovered, data_arbol, metho
 rpart.plot(tree)
 ```
 
-Hacemos validacion cruzada con arbol de decision
+Y por último hacer validacion cruzada con arbol de decision para probar su eficacia
 ```{r}
 set.seed(1234)
 split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
@@ -84,6 +84,7 @@ precisionDecisionTree
 
 
 ```
+Como podemos ver, la precisión es de un 99.09%
 
 Fuente: https://rpubs.com/rdelgado/405322
  
@@ -133,7 +134,7 @@ nb$tables
 ```
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
 
-Validacion cruzada de naive bayes
+Ahora realizaremos la validacion cruzada para ver la precisión de naive bayes
 ```{r eval=FALSE, include=FALSE}
 
 cvNaiveBayes <- lapply(folds, function(x){
@@ -148,6 +149,8 @@ cvNaiveBayes <- lapply(folds, function(x){
 precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
 precisionNaiveBayes
 ```
+
+La precisión entonces es de 93.45%
 
 Fuente: https://rpubs.com/rdelgado/405322
 
@@ -165,12 +168,11 @@ library(e1071)
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 
 dat = data.frame(x= data$New.cases, y = as.factor(data$Season))
-modelo = svm(as.factor(Season) ~ ., data = data, kernel = "linear")
-
+modelo = svm(as.factor(Season) ~ New.cases + New.deaths + New.recovered, data = data, kernel = "linear")
 ```
+Hemos tratado de mostrar la gráfica pero no hemos sido capaces de hacerlo
 
-
-Validacion cruzada de svm
+Ahora vamos a realizar la validacion cruzada para comprobar la eficacia de las máquinas de vectores de soporte
 ```{r}
 library(e1071)
 cvKernelSVM <- lapply(folds, function(x){
@@ -189,8 +191,17 @@ precisionKernelSVM <- mean(as.numeric(cvKernelSVM))
 precisionKernelSVM
 
 ```
+Como podemos ver la precisión es de un 98.09%
 
 Fuente: https://rpubs.com/rdelgado/405322
+
+## Conclusiones
+
+Como hemos podido observar el árbol es mucho mas preciso que el resto de modelos. Los árboles de decisión además tienen la ventaja de que pueden ser usados para predecir variables cualitativas y cuantitativas, además de que son simples de entender e interpretar. Sin embargo, los árboles de decisión pueden resultar algo inestables ante cualquier cambio en los datos de entrada, puede dar lugar a un árbol totalmente diferente.
+
+Por otro lado, aunque las maquinas de soporte de vectores tenga una eficacia algo menor, de un 98%, son bastante eficaces igualmente. Además las maquinas de soporte de vectores tienen la ventaja de que son bastante mas exactas en espacios de dimensiones altos. Aunque, tienen el inconveniente de que no son muy eficientes si el dataset es muy grande.
+
+Por último, aunque el de Naive Bayes sea de los tres con un 93.45% el que menos tasa de acierto tenga, es de los clasificadores más útiles cuando presuponemos la independencia entre las variables en comparación con otros. Sin embargo, también puede ser considerada un problema si los aplicamos a los datos de la vida real, puesto que Naive Bayes asume la independencia de los predictores, y en la vida real es complicado obtener un conjunto de predictores que sean totalmente independientes.
 
 # Predicción no supervisada
 
