@@ -413,10 +413,15 @@ while(i<=5000000) {
 }
 plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
 ```
+Como se puede observar, para los diferentes valores del rango de eps que se ofrece el número de clusters persite de forma continua en 1. 
 
-## Heatmaps (https://rpubs.com/Joaquin_AR/310338)
+## Heatmaps
 
-Fuente: 
+Fuente: https://rpubs.com/Joaquin_AR/310338
+
+Los heatmaps son el resultado obtenido al representar una matriz de valores en la que, en lugar de números, se muestra un gradiente de color proporcional al valor de cada variable en cada posición. Se consigue representar más información que con un simple dendrograma y se facilita la identificación visual de posibles patrones característicos de cada cluster.
+
+Procedemos a realizar las instalaciones pertinentes:
 ```{r eval=FALSE, include=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -430,8 +435,6 @@ library(ComplexHeatmap)
 library(viridis)
 colores <- magma(256)
 ```
-
-Los heatmaps son el resultado obtenido al representar una matriz de valores en la que, en lugar de números, se muestra un gradiente de color proporcional al valor de cada variable en cada posición. Se consigue representar más información que con un simple dendrograma y se facilita la identificación visual de posibles patrones característicos de cada cluster.
 
 Cargamos los datos
 ```{r}
@@ -454,6 +457,9 @@ Heatmap(matrix = data, name = "Clusters",
         clustering_method_rows = "average")
 ```
 
+## Conclusiones
+
+Como hemos podido observar al emplear las diferentes técnicas de aprendizaje se puede organizar este conjunto de datos en 3 grupos diferenciados. 
 
 # BIGML
 
