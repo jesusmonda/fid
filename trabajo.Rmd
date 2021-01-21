@@ -27,7 +27,7 @@ Trataremos de predecir la estación del año a la que pertenece el dato, teniend
 Los árboles de clasificación es un tipo de modelo de predicción que trata de predecir una variable en función de diversas variables de entrada. El árbol de clasificación lo componen una serie de nodos internos y externos así como los arcos que unen los nodos. Los nodos se les conocen como hojas del árbol y se marcan con una case o una distribución de probabilidad sobre las clases.
 
 
-Instalamos la librería rattle para poder hacer la predicción mediante árbol
+Instalamos pues, el paquete rattle para poder hacer la predicción mediante árbol
 
 ```{r eval=FALSE, include=FALSE}
 install.packages("rattle")
@@ -47,13 +47,14 @@ library(caTools)
 data_arbol <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 ```
 
-Ahora vamos a generar y a dibujar el árbol
+Ahora vamos a generar y a dibujar el árbol.
 ```{r}
 tree <- rpart(Season ~ New.cases + New.deaths + New.recovered, data_arbol, method="class")
 rpart.plot(tree)
 ```
+Como podemos ver en el árobl, pese a que estemos tratando de predecir mediante 3 variables, el árbol ha seleccionado la variable que considera mas importante para dividr el árbol, en este caso ha seleccionado la variable de "New Cases".
 
-Y por último hacer validacion cruzada con arbol de decision para probar su eficacia
+Y por último hacer validacion cruzada con arbol de decision para probar su eficacia.
 ```{r}
 set.seed(1234)
 split <- sample.split(data_arbol$Season, SplitRatio = 0.80)
@@ -90,7 +91,7 @@ Fuente: https://rpubs.com/rdelgado/405322
  
 ## Clasificación mediante Naive Bayes
 
-Fuente: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html, https://rpubs.com/riazakhan94/naive_bayes_classifier_e1071
+Fuentes: https://fervilber.github.io/Aprendizaje-supervisado-en-R/ingenuo.html, https://rpubs.com/riazakhan94/naive_bayes_classifier_e1071
 
 Naive Bayes es un modelo para predecir por probabilidad Bayesiana, de tal forma que clasifica el resultado en función de variables que a priori son independientes entre sí. La formula de Bayes es:
 
@@ -132,10 +133,10 @@ Ahora vamos a mostrar la tabla de probabilidades, para cada atributo se muestra 
 ```{r}
 nb$tables
 ```
-De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias.
+De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias. Usando la función de predict nos devolverá directamente el resultado de la predicción.
 
 Ahora realizaremos la validacion cruzada para ver la precisión de naive bayes
-```{r eval=FALSE, include=FALSE}
+```{r}
 
 cvNaiveBayes <- lapply(folds, function(x){
   training_fold <- training_set[-x, ]
@@ -167,10 +168,9 @@ library(e1071)
 # Ejecución del modelo SVM
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 
-dat = data.frame(x= data$New.cases, y = as.factor(data$Season))
 modelo = svm(as.factor(Season) ~ New.cases + New.deaths + New.recovered, data = data, kernel = "linear")
 ```
-Hemos tratado de mostrar la gráfica pero no hemos sido capaces de hacerlo
+Hemos tratado de mostrar la gráfica pero no hemos sido capaces de hacerlo. Una vez sacado el modelo, podremos hacer las predicciones mediante la función predict, esta función devolverá directamente el valor de la predicción.
 
 Ahora vamos a realizar la validacion cruzada para comprobar la eficacia de las máquinas de vectores de soporte
 ```{r}
@@ -197,9 +197,9 @@ Fuente: https://rpubs.com/rdelgado/405322
 
 ## Conclusiones
 
-Como hemos podido observar el árbol es mucho mas preciso que el resto de modelos. Los árboles de decisión además tienen la ventaja de que pueden ser usados para predecir variables cualitativas y cuantitativas, además de que son simples de entender e interpretar. Sin embargo, los árboles de decisión pueden resultar algo inestables ante cualquier cambio en los datos de entrada, puede dar lugar a un árbol totalmente diferente.
+Como hemos podido observar el árbol es mucho mas preciso que el resto de modelos. Los árboles de decisión además tienen la ventaja de que pueden ser usados tanto para predecir variables cualitativas y cuantitativas, además de que son simples de entender e interpretar. Sin embargo, los árboles de decisión pueden resultar algo inestables ante cualquier cambio en los datos de entrada, puede dar lugar a un árbol totalmente diferente.
 
-Por otro lado, aunque las maquinas de soporte de vectores tenga una eficacia algo menor, de un 98%, son bastante eficaces igualmente. Además las maquinas de soporte de vectores tienen la ventaja de que son bastante mas exactas en espacios de dimensiones altos. Aunque, tienen el inconveniente de que no son muy eficientes si el dataset es muy grande.
+Por otro lado, aunque las maquinas de soporte de vectores tenga una eficacia algo menor, de un 98%, son bastante eficaces igualmente.Además, las maquinas de soporte de vectores tienen la ventaja de que son bastante mas exactas en espacios de dimensiones altos. Aunque, tienen el inconveniente de que no son muy eficientes si el dataset es muy grande.
 
 Por último, aunque el de Naive Bayes sea de los tres con un 93.45% el que menos tasa de acierto tenga, es de los clasificadores más útiles cuando presuponemos la independencia entre las variables en comparación con otros. Sin embargo, también puede ser considerada un problema si los aplicamos a los datos de la vida real, puesto que Naive Bayes asume la independencia de los predictores, y en la vida real es complicado obtener un conjunto de predictores que sean totalmente independientes.
 
@@ -399,7 +399,7 @@ Podemos observar como siempre obtenemos 1 cluster independientemente del valor d
 
 Por último, hacemos la prueba con muchos valores de eps y mostramos el número de clusters devuelto. 
 Los valores de eps van desde 1000000 hasta 5000000, lo sabemos gracias a la gráfica anterior generada mediante kNNdistplot, pero de 1000 en 1000 para agilizar el proceso. Podemos observar como siempre devuelve 1 cluster.
-```{r}
+```{r warning=FALSE}
 wss <- 0
 value <- 0
 i <- 1000000
