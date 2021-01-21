@@ -209,6 +209,8 @@ Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.k
 
 Las técincas de predicción no supervisada tiene el objetivo de explorar un conjunto de datos para encontrar alguna estructura o forma de organizarlos. Por ello es muy frecuente emplear estas técnicas para agrupar datos con características o comportamientos similares.
 
+En este apartado veremos algunas técnicas de aprendizaje no supervisado empleadas para la organización de los datos.
+
 ## 1. KMeans
 
 Fuente: https://rpubs.com/williamsurles/310847, https://www.geeksforgeeks.org/clustering-in-r-programming
@@ -279,8 +281,18 @@ ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point
 Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seasons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seasons.
 
 
-## 2. Principal component analysis (https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca)
+## 2. Principal component analysis
 
+Fuente: https://rpubs.com/Cristina_Gil/PCA, https://lgatto.github.io/IntroMachineLearningWithR/unsupervised-learning.html#principal-component-analysis-pca
+
+PCA es una de las técnicas de aprendizaje no supervisado, las cuales suelen aplicarse como parte del análisis exploratorio de los datos.
+
+Nosotros emplearemos esta técnica como herramienta para la visualización de datos, aunque también se suele emplear para la reducción de dimensiones (variables).
+
+En este caso cabe destacar que, aunque hemos investigado y estudiado como sería el proceso, debido a un fallo persitente con la instalación de la libreria "FactoMineR" no nos ha sido posible ejecutar la función PCA. Por tanto, nos resulta imposible visualizar la técnica. Aún así, hemos querido dejar constancia del trabajo realizado:
+
+
+Procedemos a realizar las instalaciones pertinentes:
 ```{r eval=FALSE, include=FALSE}
 install.packages("FactoMineR")
 ```
@@ -288,10 +300,6 @@ install.packages("FactoMineR")
 ```{r}
 library("FactoMineR")
 ```
-
-PCA es una de las técnicas de aprendizaje no supervisado, las cuales suelen aplicarse como parte del análisis exploratorio de los datos.
-
-Una de las aplicaciones de PCA es como herramienta para la visualización de datos.
 
 Cargamos los datos:
 ```{r}
@@ -329,8 +337,20 @@ fviz_pca_ind(pca, geom.ind = "point",
              pointsize = 1.5) 
 ```
 
-## DBSCAN (https://rpubs.com/elias_jurgen/605966)
+## DBSCAN
 
+Fuente: https://rpubs.com/elias_jurgen/605966
+
+Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físico. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
+
+Este método necesita sólo dos parámetros
+  ·eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente” basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
+  
+  ·minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número se puede elegir basándose en el número de dimensiones del dataset.
+  
+  ·D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca es menor que 3
+
+Procedemos a realizar las instalaciones pertinentes:
 ```{r eval=FALSE, include=FALSE}
 install.packages("dbscan")
 ```
@@ -338,16 +358,8 @@ install.packages("dbscan")
 ```{r}
 library("dbscan")
 ```
-Es un método de clusterización adecuado para buscar patrones de agrupación en el espacio físic. Este algorítmo agrupa los puntos que están más cercanos respecto a la distancia euclidiana, además para este algorítmo se tiene que cada cluster contendrá un mínimo de puntos.
 
-Este método necesita sólo dos parámetros
-  ·eps: Esta es la distancia que se tomará como radio de los clusters. Este parámetro se puede elegir “correctamente”   basándose en la distancia del dataset (utilizando un K-distance Plot). Es preferible utilizar valores pequeños
-  
-  ·minPoints: Mínimo de números que deben estar en un grupo para que el algorítmo lo tome com un cluster. Este número   se puede elegir basándose en el número de dimensiones del dataset.
-  
-  ·D es el número de dimensiones del dataset. Este parámetro debe ser proporcional al tamaño del dataset pero nunca    es menor que 3
-
-Cargamos los datos: Sólo hay 3 tipos de Seasons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seasons" que es la clasificación a la que tratariamos de llegar por ello vamos a eliminarla del dataset. Tenemos 15 variables restantes en la base así que tomaremos 16 como el mínimo número de puntos.
+Cargamos los datos. Sólo hay 3 tipos de Seasons, así que lo ideal sería obtener esos 3 clusters. Tenemos 16 variables, una de ella es "Seasons" que es la clasificación a la que tratariamos de llegar, por ello la vamos a eliminarla del dataset. Una vez eliminada tendrémos 15 variables restantes en la base, así que tomaremos 16 como el mínimo número de puntos.
 ```{r}
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 data$Season <- NULL
@@ -366,7 +378,7 @@ abline(h = 1000000, lty = 2)
 ### eps=1000000
 Por lo que se observa en la gráfica tomaremos eps=1000000
 
-Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+Al aplicar la función y representar gráficamente el resultado se puede observar 1 clusters. Se ve claramente como hemos obtenido un número erroneo de clusters, esto puede deberse al valor de eps.
 ```{r}
 cl<-dbscan(data,eps=1000000,MinPts = 5)
 unique(cl$cluster)
@@ -376,7 +388,7 @@ hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=1000000")
 ### eps=3000000
 Tomaremos eps=3000000
 
-Por último, al aplicar la función y graficar el resultado se observaron 1 clusters podemos observar como hemos obtenido un numero erroneos de cluster, esto puede deberse por el valor del eps
+Se procede a aplicar la función ahora con un número más elevado de eps, pero el resultado sigue persistiendo.
 ```{r}
 cl<-dbscan(data,eps=3000000,MinPts = 5)
 unique(cl$cluster)
@@ -385,7 +397,8 @@ hullplot(data,cl$cluster, main = "Convex cluster Hulls, eps=3000000")
 
 Podemos observar como siempre obtenemos 1 cluster independientemente del valor del eps
 
-Por ultimo, hacemos la prueba con muchos valores de eps y mostramos el numero de cluster devuelto. Los valores de eps van desde 1000000 hasta 5000000, lo sabemos gracias a la grafica anterior generada mediante kNNdistplot, pero de 1000 en 1000 para agilizar el proceso. Podemos observar como siempre devuelve 1 cluster.
+Por último, hacemos la prueba con muchos valores de eps y mostramos el número de clusters devuelto. 
+Los valores de eps van desde 1000000 hasta 5000000, lo sabemos gracias a la gráfica anterior generada mediante kNNdistplot, pero de 1000 en 1000 para agilizar el proceso. Podemos observar como siempre devuelve 1 cluster.
 ```{r}
 wss <- 0
 value <- 0
@@ -403,6 +416,7 @@ plot(value, wss, type = "b", xlab = "Valor de EPS", ylab="Number of Clusters")
 
 ## Heatmaps (https://rpubs.com/Joaquin_AR/310338)
 
+Fuente: 
 ```{r eval=FALSE, include=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
