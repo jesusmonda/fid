@@ -459,7 +459,17 @@ Heatmap(matrix = data, name = "Clusters",
 
 ## Conclusiones
 
-Como hemos podido observar al emplear las diferentes técnicas de aprendizaje se puede organizar este conjunto de datos en 3 grupos diferenciados. 
+Como hemos podido observar de manera general al emplear las diferentes técnicas de aprendizaje no supervisado, este conjunto de datos se puede organizar en 3 grupos diferenciados.
+
+Al emplear K-means se pudo ver gráficamente como al pintar los datos en función de la columna Seassons en un inicio, surgían 3 grupos separados. Después al eliminar del conjunto de datos dicha columna y aplicar el algoritmo de k-means se han obtenido 3 clusters que se identifican con los 3 tipos de la columna Seassons. Por lo que se puede concluir que el algoritmo ha realizado un buen trabajo de agrupación.
+
+En el caso de DBSCAN nos encontramos con la problemática técnica anteriormente descrita (fallo de instalación de librería), por la cual no pudimos ver resultados.
+
+Aplicando PCA, podemos concluir que no es un método adecuado para clasificar nuestro conjunto de datos. Esto creemos que es debido a que tienen demasiado ruido y no hemos podido encontrar una manera efectiva de reducirlo y afinar el resultado.
+
+Por último, al aplicar Heatmaps, hemos podido confirmar la agrupación de esos 3 grupos que se mostraron con k-means.
+
+En general, hemos obtenido resultados aceptables y dentro de lo que esperábamos.
 
 # BIGML
 
