@@ -5,7 +5,7 @@ output:
 ---
 # Trabajo FID
 
-El dataset utilizado ha sido https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
+El dataset utilizado para todas las técnicas ha sido: https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
 
 Alcance del proyecto: Análisis avanzado e investigación BIGML.
 GitHub: https://github.com/jesusmonda/fid
@@ -207,11 +207,14 @@ Por último, aunque el de Naive Bayes sea de los tres con un 93.45% el que menos
 
 Para estas predicciones hemos usado un dataset extraido de kaggle (https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv) que muestra los datos del covid a nivel mundial divididos por días.
 
-## 1. KMeans (https://rpubs.com/williamsurles/310847) (https://www.geeksforgeeks.org/clustering-in-r-programming)
+Las técincas de predicción no supervisada tiene el objetivo de explorar un conjunto de datos para encontrar alguna estructura o forma de organizarlos. Por ello es muy frecuente emplear estas técnicas para agrupar datos con características o comportamientos similares.
+
+## 1. KMeans
+
+Fuente: https://rpubs.com/williamsurles/310847, https://www.geeksforgeeks.org/clustering-in-r-programming
 
 K-Means es una técnica iterativa de agrupamiento duro que utiliza un algoritmo de aprendizaje no supervisado. En él, el número total de grupos es predefinido por el usuario, y en base a la similitud de cada punto de datos, los puntos de datos se agrupan. 
-
-K-means consiste en una agrupación de datos, y la agrupación es una técnica de aprendizaje no supervisada en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos. Todos los objetos de un grupo comparten características comunes. Durante la extracción y el análisis de datos, la agrupación se utiliza para encontrar los conjuntos de datos similares.
+Es decir, consiste en una agrupación de datos, en la que el conjunto de datos se divide en varios grupos llamados "clusters" en función de su similitud. Después de la segmentación de los datos se producen varios grupos de datos, y todos los objetos de un grupo comparten características comunes. 
 
 
 Cargamos librerias
@@ -228,7 +231,7 @@ ggplot(data, aes(New.cases, Deaths, Recovered, color = Season)) + geom_point()
 
 ```
 
-Al interpretar los datos, podemos obsevar como hay 3 grupos de datos. (1 = invierno, 2 = primavera, 3 = verano)
+Al interpretar los datos, podemos obsevar como hay 3 grupos de datos diferenciados. (1 = winter, 2 = Spring, 3 = Summer)
 
 Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seasons: 
 ```{r}
@@ -240,13 +243,13 @@ plot(data,
   main = "k-means with 2 clusters")
 ```
 
-La suma de las distancias al cuadrado de cada observación con la media de la muestra global, obtenemos total_SS.
-La suma de las distancias cuadradas de estas tres medias a la media general, obtenemos between_SS.
+Como podemos observar en la consola R hay un buen ratio BSS/TSS *, ya que es del 75.9 %. Pero se podría mejorar.
 
-Como podemos observar hay un buen ratio BSS/TSS, ya que es del 75.9 %. Pero se podría mejorar.
+(*) BSS -> la suma de las distancias al cuadrado de cada observación con la media de la muestra global, obtenemos total_SS.
+    TSS -> la suma de las distancias cuadradas de estas tres medias a la media general, obtenemos between_SS.
 
-Necesitamos elegir k, el número de clusters. 
-Hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
+Necesitamos elegir k, el número de clusters idóneo. 
+Para ello hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
 ```{r}
 wss <- 0
 for (i in 1:15) {
@@ -267,7 +270,7 @@ plot(data,
 table(km$cluster, data$Season)
 ```
 
-Al emplear k = 3 se ha obtenido un ratio BSS/TSS mejor del 90%.
+Al emplear k = 3 se ha obtenido un ratio BSS/TSS del 90%, el cual es mejor que el anterior (k=2).
 
 Visualizamos el resultado:
 ```{r}
