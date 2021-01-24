@@ -11,10 +11,68 @@ Alcance del proyecto: Análisis avanzado e investigación BIGML.
 GitHub: https://github.com/jesusmonda/fid
 
 Miembros del equipo:  
+
 * Roberto Hermoso Núñez (robhernun) 
 * Pablo García Barco (pabgarbar) 
 * María del Carmen Arenas Zayas (mararezay) 
 * Jesús Monda Caña (jesmoncaa, jmonda) 
+
+## Reparto de tareas
+
++---------------------------------+----------------------+
+|             Tareas              | Personas implicadas  |
++=================================+======================+
+| Preprocesamineto                | Jesús y Roberto      |
++---------------------------------+----------------------+
+| Visualización                   | Roberto y Maricarmen |
++---------------------------------+----------------------+
+| Árbol de decisión               | Jesús y Roberto      |
++---------------------------------+----------------------+
+| Naive Bayes                     | Roberto              |
++---------------------------------+----------------------+
+| Maquinas de vectores de soporte | Roberto              |
++---------------------------------+----------------------+
+| Validación cruzada              | Pablo                |
++---------------------------------+----------------------+
+| KMeans                          | Maricarmen           |
++---------------------------------+----------------------+
+| Principal component analysis    | Maricarmen y Jesús   |
++---------------------------------+----------------------+
+| DBSCAN                          | Jesús                |
++---------------------------------+----------------------+
+| Heatmaps                        | Maricarmen           |
++---------------------------------+----------------------+
+| BIGML                           | Roberto              |
++---------------------------------+----------------------+
+
+## Preprocesamiento
+
+Lo primero es necesario hacer un preprocesario, este preprocesamiento lo hemos realizado en Python, el archivo se encuentra en la carpeta "script". El dataset original se encuentra también en dicha carpeta, el primer paso es normalizar las fechas, y después añadir una columna nueva indicando la estación del año en la que se encuentra cada dato. Para poder normalizar los días tuvimos que enconrtar cúal es la fecha mas antigua, por cada iteración se calcualó la diferencia de días de la fecha de cada dato con la fecha inicial, además de establecer a que estación pertence. Esto último se hizo mediante un simple comparador de fechas.
+
+## Visualización
+
+```{r}
+library(ggplot2)
+```
+
+Cargamos y visualizamos los datos. Vamos a visualizar los nuevos casos, nuevos recuperados y nuveas muertes diarias.
+```{r}
+data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
+
+ggplot(data, aes(Date, New.cases)) + geom_line(color="red")
+ggplot(data, aes(Date, New.deaths)) + geom_line(color="black")
+ggplot(data, aes(Date, New.recovered)) + geom_line(color="blue")
+
+```
+
+Y ahora mosrtaremos la densidad estos tres atributos por cada estación.
+```{r}
+ggplot(data, aes(Season, New.cases, fill=Season)) + geom_bar(stat="identity")
+ggplot(data, aes(Season, New.deaths, fill=Season)) + geom_bar(stat="identity")
+ggplot(data, aes(Season, New.recovered, fill=Season)) + geom_bar(stat="identity")
+```
+
+Como podemos ver, hay muchos mas casos y muertes diarias en primavera, principalmente porque los datos empiezan a partir de enero y termina en julio, por lo que la mayoría de los datos se encuentran en primavera. Por otro lado, hay mas recuperados diarios en verano.
 
 
 # Predicción supervisada
@@ -136,7 +194,7 @@ nb$tables
 De esta forma, Naive bayes es capaz de calcular la probabilidad de que la muestra se trate de una estación u otra según el número de casos, muertes y recuperaciones diarias. Usando la función de predict nos devolverá directamente el resultado de la predicción.
 
 Ahora realizaremos la validacion cruzada para ver la precisión de naive bayes
-```{r}
+```{r warning=FALSE}
 
 cvNaiveBayes <- lapply(folds, function(x){
   training_fold <- training_set[-x, ]
@@ -229,7 +287,7 @@ Cargamos y visualizamos los datos
 data <- read.delim('datos_nuevos_casos/regresion_train.csv', sep=",", head = TRUE)
 head(data)
 
-ggplot(data, aes(New.cases, Deaths, Recovered, color = Season)) + geom_point()
+ggplot(data, aes(New.cases, New.deaths, New.recovered, color = Season)) + geom_point()
 
 ```
 
@@ -276,7 +334,7 @@ Al emplear k = 3 se ha obtenido un ratio BSS/TSS del 90%, el cual es mejor que e
 
 Visualizamos el resultado:
 ```{r}
-ggplot(data, aes(New.cases, Deaths, Recovered, color = km$cluster)) + geom_point()
+ggplot(data, aes(New.cases, New.deaths, New.recovered, color = km$cluster)) + geom_point()
 ```
 Como se puede ver en la gráfica han salido 3 grupos diferenciados de datos, los cuales se corresponden con la división inicial por Seasons. De esto podemos concluir que la agrupación de k-means ha tenido un resultado satisfactorio, ya que equivale a las 3 Seasons.
 
