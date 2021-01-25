@@ -49,6 +49,50 @@ Miembros del equipo:
 
 Lo primero es necesario hacer un preprocesario, este preprocesamiento lo hemos realizado en Python, el archivo se encuentra en la carpeta "script". El dataset original se encuentra también en dicha carpeta, el primer paso es normalizar las fechas, y después añadir una columna nueva indicando la estación del año en la que se encuentra cada dato. Para poder normalizar los días tuvimos que enconrtar cúal es la fecha mas antigua, por cada iteración se calcualó la diferencia de días de la fecha de cada dato con la fecha inicial, además de establecer a que estación pertence. Esto último se hizo mediante un simple comparador de fechas.
 
+```{r}
+install.packages("lubridate")
+install.packages("data.table")
+```
+```{r}
+day_wise <- read.delim('script/day_wise.csv', sep=",", head = TRUE)
+```
+```{r}
+getSeason <- function(DATES) {
+    WS <- as.Date("2012-12-15", format = "%Y-%m-%d") # Winter Solstice
+    SE <- as.Date("2012-3-15",  format = "%Y-%m-%d") # Spring Equinox
+    SS <- as.Date("2012-6-15",  format = "%Y-%m-%d") # Summer Solstice
+    FE <- as.Date("2012-9-15",  format = "%Y-%m-%d") # Fall Equinox
+
+    # Convert dates from any year to 2012 dates
+    d <- as.Date(strftime(DATES, format="2012-%m-%d"))
+
+    ifelse (d >= WS | d < SE, "Winter",
+      ifelse (d >= SE & d < SS, "Spring",
+        ifelse (d >= SS & d < FE, "Summer", "Autumn")))
+}
+
+```
+
+```{r}
+for (row in 1:nrow(day_wise)){
+data<-day_wise[row,]
+data$Season<-getSeason(data$Date)
+}
+```
+
+```{r}
+
+for (row in 1:nrow(day_wise)){
+earlies_date<-as.Date("2021-12-15", format = "%Y-%m-%d") 
+date<-day_wise[row,1]
+print(date
+date<-as.Date(date, format = "%Y-%m-%d") 
+if(earlies_date>date){
+  earlies_date<-date
+}
+}
+print(earlies_date)
+```
 ## Visualización
 
 ```{r}
