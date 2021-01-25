@@ -7,8 +7,8 @@ output:
 
 El dataset utilizado para todas las técnicas ha sido: https://www.kaggle.com/imdevskp/corona-virus-report?select=day_wise.csv
 
-Alcance del proyecto: Análisis avanzado e investigación BIGML.
-GitHub: https://github.com/jesusmonda/fid
+* Alcance del proyecto: Análisis avanzado e investigación BIGML.
+* GitHub: https://github.com/jesusmonda/fid
 
 Miembros del equipo:  
 
