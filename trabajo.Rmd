@@ -47,21 +47,20 @@ Miembros del equipo:
 
 ## Preprocesamiento
 
-Lo primero es necesario hacer un preprocesario, este preprocesamiento lo hemos realizado en Python, el archivo se encuentra en la carpeta "script". El dataset original se encuentra también en dicha carpeta, el primer paso es normalizar las fechas, y después añadir una columna nueva indicando la estación del año en la que se encuentra cada dato. Para poder normalizar los días tuvimos que enconrtar cúal es la fecha mas antigua, por cada iteración se calcualó la diferencia de días de la fecha de cada dato con la fecha inicial, además de establecer a que estación pertence. Esto último se hizo mediante un simple comparador de fechas.
+Lo primero es necesario hacer un preprocesario. El dataset original se encuentra en la carpeta "Script", el primer paso es normalizar las fechas, y después añadir una columna nueva indicando la estación del año en la que se encuentra cada dato. Para poder normalizar los días tuvimos que enconrtar cúal es la fecha mas antigua, por cada iteración se calcualó la diferencia de días de la fecha de cada dato con la fecha inicial, además de establecer a que estación pertence. Esto último se hizo mediante un simple comparador de fechas.
 
-```{r}
-install.packages("lubridate")
-install.packages("data.table")
-```
+Primero cargamos los datos
 ```{r}
 day_wise <- read.delim('script/day_wise.csv', sep=",", head = TRUE)
 ```
+
+Después realizamos una función para determinar a que estación del año pertenece el día que le estemos indicando
 ```{r}
 getSeason <- function(DATES) {
-    WS <- as.Date("2012-12-15", format = "%Y-%m-%d") # Winter Solstice
-    SE <- as.Date("2012-3-15",  format = "%Y-%m-%d") # Spring Equinox
-    SS <- as.Date("2012-6-15",  format = "%Y-%m-%d") # Summer Solstice
-    FE <- as.Date("2012-9-15",  format = "%Y-%m-%d") # Fall Equinox
+    WS <- as.Date("2012-12-21", format = "%Y-%m-%d") # Winter Solstice
+    SE <- as.Date("2012-3-21",  format = "%Y-%m-%d") # Spring Equinox
+    SS <- as.Date("2012-6-21",  format = "%Y-%m-%d") # Summer Solstice
+    FE <- as.Date("2012-9-23",  format = "%Y-%m-%d") # Fall Equinox
 
     # Convert dates from any year to 2012 dates
     d <- as.Date(strftime(DATES, format="2012-%m-%d"))
@@ -73,26 +72,42 @@ getSeason <- function(DATES) {
 
 ```
 
+Hacemos una copia del dataset
 ```{r}
-for (row in 1:nrow(day_wise)){
-data<-day_wise[row,]
-data$Season<-getSeason(data$Date)
-}
+day_wise_procesado <- day_wise
+day_wise_procesado$Season = rep(1,nrow(day_wise))
 ```
 
+Y hallamos la fecha mas antigua, en este caso, se trata del 22 de enero de 2020
 ```{r}
-
-for (row in 1:nrow(day_wise)){
-earlies_date<-as.Date("2021-12-15", format = "%Y-%m-%d") 
-date<-day_wise[row,1]
-print(date
-date<-as.Date(date, format = "%Y-%m-%d") 
-if(earlies_date>date){
-  earlies_date<-date
-}
+strDates <- day_wise[[1]]
+dates <- as.Date(strDates, "%Y-%m-%d")
+for(row in 1:nrow(day_wise)){
+date<-dates[row]
+  if(row==1){
+    earlies_date=date
+  }else if(earlies_date>date){
+    earlies_date<-date
+  }
 }
 print(earlies_date)
 ```
+
+Después realizamos los cambios correspondientes al dataset
+```{r warning=FALSE}
+for (row in 1:nrow(day_wise)){
+data<-day_wise[row,]
+data$Season=getSeason(data$Date)
+data$Date<- as.Date(data$Date, "%Y-%m-%d") - earlies_date
+day_wise_procesado[row,]<-data
+}
+```
+
+Y por último guardamos un fichero con estos datos para evitar tener que hacer el procesamiento si eliminamos las variables del proyecto.
+```{r}
+write.csv(day_wise_procesado,"datos_nuevos_casos/regresion_train.csv", row.names = FALSE)
+```
+
 ## Visualización
 
 ```{r}
@@ -339,7 +354,7 @@ Al interpretar los datos, podemos obsevar como hay 3 grupos de datos diferenciad
 
 Realizamos una primera prueba de K-means con 2 cluster, para ello utilizamos todas las columnas del dataset exceptuando la de Seasons: 
 ```{r}
-km.out <- kmeans(data[0:15], centers = 2, nstart = 20)
+km.out <- kmeans(data[0:12], centers = 2, nstart = 20)
 summary(km.out) # Inspect the result
 print(km.out)
 plot(data, 
@@ -356,16 +371,16 @@ Necesitamos elegir k, el número de clusters idóneo.
 Para ello hay un punto donde la curva SSE comienza a doblarse conocido como el punto del codo. Se cree que el valor x de este punto es un equilibrio razonable entre el error y el número de cúmulos. En nuestro caso, tras observar la gráfica podemos ver que es 3.
 ```{r}
 wss <- 0
-for (i in 1:15) {
-  km.out <- kmeans(x = data[0:15], centers = i, nstar=20)
+for (i in 1:13) {
+  km.out <- kmeans(x = data[0:12], centers = i, nstar=20)
   wss[i] <- km.out$tot.withinss
 }
-plot(1:15, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
+plot(1:13, wss, type = "b", xlab = "Number of Clusters", ylab = "Within groups sum of squares")
 ```
 Como se puede ver en la gráfica empieza a decrementar en x=3, por lo que emplearemos k = 3.
 ```{r}
 k <- 3
-km <- kmeans(data[0:15], centers = k, nstart = 20)
+km <- kmeans(data[0:12], centers = k, nstart = 20)
 print(km)
 plot(data,
      col = km$cluster,
